@@ -45,9 +45,13 @@ this repo's Pages deployment or hand-carry it to a closed network.
 - **STACK** — a multi-domain 3D stack, real WebGL via a locally vendored Three.js (no CDN):
   every domain in the scenario becomes a glowing translucent layer, nodes sit on their domain
   plane at their real geographic position as hand-drawn icon sprites, and cross-domain
-  dependencies draw as glowing arcs — select a finding and its chain lights up from seabed to
-  space. Orbit camera, zoom, per-domain layer toggles, an enemy/OPFOR visibility toggle, a
-  spotlight briefing tool, auto-orbit, and a computed area-of-operations readout.
+  dependencies draw as glowing, continuously animated arcs — select a finding and a glow
+  travels its chain from seabed to space. Land and maritime share one surface tier rather than
+  stacking like the abstract domains (a coastline is one surface, not two layers). Orbit
+  camera with eased fit/zoom, per-domain layer toggles, an enemy/OPFOR visibility toggle, a
+  spotlight briefing tool, auto-orbit, a deterministic starfield, and a computed
+  area-of-operations readout — all reproducible pixel-for-pixel on export despite the
+  continuous animation.
 - **RISK** — BLUF paragraph, ranked criticality with per-component score bars and live weight
   sliders, finding cards split auto-detected vs analyst-asserted, and emergent findings tagged
   with the hour they appeared.
@@ -84,7 +88,7 @@ Same engine, opposite sides of the planet — scenarios are not tied to any thea
 
 ```sh
 npm install        # jsdom, dev-only test runner — see "third-party assets" below for what ships to users
-npm run verify     # static gates (syntax, offline discipline) + 36-check headless smoke suite
+npm run verify     # static gates (syntax, offline discipline) + 38-check headless smoke suite
 ```
 
 CI runs the same pipeline on every push. Gates include: zero console errors on boot, pinned

@@ -83,13 +83,46 @@ app/
 ### STACK view — real WebGL, and why
 
 The stack view renders every domain in the scenario as a translucent plane at a hand-tuned
-altitude (space highest, land lowest; land and maritime sit at the scenario's actual
-geographic footprint rather than a synthetic offset square, since real lat/lon already keeps
-a naval unit separate from an inland one), with nodes as canvas-drawn, halo-glowing billboard
-sprites and cross-domain dependencies as glowing Bezier arcs. It was rebuilt twice in one day:
-first as a canvas-2D approximation, then — at the owner's request to match a specific prior
-prototype's fidelity — as genuine WebGL, porting that prototype's actual techniques rather
-than re-deriving them:
+altitude, with nodes as canvas-drawn, halo-glowing billboard sprites and cross-domain
+dependencies as glowing, animated Bezier arcs. It was rebuilt three times in one day: first as
+a canvas-2D approximation, then — at the owner's request to match a specific prior prototype's
+fidelity — as genuine WebGL porting that prototype's actual techniques, then a third pass
+fixing a geometry error and adding the continuous animation layer that was researched but
+never implemented in pass two:
+
+**Land and maritime are a surface TIER, not two stacked layers.** Every abstract domain
+(space/air/ems/cyber/c2/data/strike/sustain) genuinely IS "more abstract, further from the
+ground" than the one below it, so stacking them by altitude is the right model. Land and
+maritime are different in kind: a coastline is one physical surface at one reference height,
+not the ocean floating above (or buried under) the beach. The first WebGL pass got this wrong
+— it gave maritime a materially higher altitude than land, the same treatment as every other
+domain — until the owner pointed out the geometry itself didn't make sense. Fixed: both now
+share one `SURFACE_ALT` tier (a few world units apart, just enough to avoid z-fighting between
+their two plane meshes), distinguished the way real geography already distinguishes them — a
+naval unit's lat/lon puts it out to sea, an inland unit's puts it on the coast — never a
+synthetic horizontal offset square the way the source faked it with hand-authored PLAN-view
+coordinates. Gated in `measure.js`: land/maritime altitudes must be within 5 units of each
+other, and the surface tier must sit well below the nearest abstract domain.
+
+**Continuous idle animation** — the piece that made the view feel like a still frame instead
+of "peering into a movie," per direct owner feedback. Sine-modulated pulsing opacity on
+high-criticality and selection rings; a glow-head sprite that travels continuously along every
+emphasized/finding-highlighted link's arc (deterministic per-object phase from a string hash
+of the node/link id — never `Math.random`, never wall-clock alone); a pulsing (not moving)
+scale on activity glow-heads, whose *position* stays driven purely by the real timeline
+scrubber; a deterministic-seeded seeded starfield for background depth; `THREE.AdditiveBlending`
+on every glow/pulse/head material for real luminosity instead of a flat alpha blend; eased
+(not instant) camera transitions on fit/zoom button clicks, while live drag/wheel interaction
+stays immediate. One persistent `requestAnimationFrame` loop drives all of this whenever the
+stack view is on screen, independent of the separate auto-orbit toggle.
+
+**Reproducible exports, protected.** Continuous animation and "two exports of the same
+selection are byte-identical" are in tension — solved by freezing the animation clock to a
+fixed instant during `exportDraw` (verified: two exports 900ms apart produce byte-identical
+PNG data). Camera framing is deliberately NOT frozen the same way — it was never part of the
+reproducibility contract, so an export mid-tween simply captures wherever the camera is.
+
+What was ported from the original prototype, technique-for-technique:
 
 - **No bloom post-process anywhere** (confirmed absent in the source too). Every "glow" is
   either a layered translucent `MeshBasicMaterial` disc/ring (`depthWrite:false`), a

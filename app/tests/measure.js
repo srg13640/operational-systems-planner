@@ -108,6 +108,14 @@ function check(name, cond, detail) {
     re.issues.filter(i => i.level === 'error').length === 0,
     re.scenario.nodes.length + ' nodes, ' + re.issues.length + ' issues');
 
+  // ---- stack view: land and maritime must sit at (nearly) the same altitude, not
+  // stacked like the abstract domains — a coastline is one surface, not two layers ----
+  check('stack: land/maritime coplanar (surface tier, not stacked)',
+    Math.abs(OSP.renderStack.getDomainAlt('land') - OSP.renderStack.getDomainAlt('maritime')) <= 5,
+    OSP.renderStack.getDomainAlt('land') + ' vs ' + OSP.renderStack.getDomainAlt('maritime'));
+  check('stack: surface tier well below the nearest abstract domain',
+    OSP.renderStack.getDomainAlt('sustain') - OSP.renderStack.getDomainAlt('land') > 40, '');
+
   // ---- second built-in scenario (Baltic) embeds clean and carries its own reveal ----
   const balticRaw = JSON.parse(app1.document.getElementById('seed-scenario-baltic').textContent);
   const balticNorm = OSP.model.normalizeScenario(balticRaw);

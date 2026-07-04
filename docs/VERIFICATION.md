@@ -1,6 +1,52 @@
 # Verification
 
-Updated: 2026-07-04 (Loop 8).
+Updated: 2026-07-04 (Loop 9).
+
+## Loop 9 gate run — 2026-07-04 (layer-geometry fix + cinematic animation)
+
+Two pieces of direct owner feedback: (1) land/maritime were stacked at different altitudes
+like the abstract domains, which doesn't make physical sense — a coastline is one surface, not
+two; (2) the view felt static ("peering into an actual movie" was the bar) — the sine-pulsed
+rings and traveling glow heads researched from the source prototype in Loop 8 were never
+actually implemented, only the static geometry was.
+
+**Geometry fix**: land and maritime now share one surface-altitude tier (25/27 world units
+apart — enough to avoid z-fighting between the two plane meshes, imperceptible as a "layer
+gap"), distinguished by their real lat/lon separation rather than a synthetic offset or a
+meaningful vertical stack. New regression gate in `measure.js`: land/maritime altitudes must
+be within 5 units of each other, and the surface tier must sit well below the nearest abstract
+domain — both pass. Verified visually in the browser from a near-horizontal camera angle on
+both scenarios: Pacific (maritime only) shows it sitting with the ground-level cluster, not
+elevated; Baltic (land + maritime both present) shows both labels immediately adjacent with no
+visible gap, unlike the clearly-separated abstract-domain bands above them.
+
+**Animation layer added**: continuous `requestAnimationFrame` loop, independent of the
+auto-orbit toggle, driving sine-modulated pulse opacity on criticality/selection rings, a
+glow-head sprite traveling along every emphasized/finding-highlighted link's arc, pulsing
+(not moving) scale on activity glow-heads, and additive blending on every glow/pulse/head
+material. Verified live (not assumed): two screenshots ~1 second apart show the finding-chain
+glow head at visibly different positions along its arc, confirming the loop genuinely runs
+frame-to-frame rather than only re-rendering on state changes.
+
+**The determinism/animation tension, resolved and verified**: continuous motion and "exports
+are byte-identical" are in conflict unless something explicit resolves it. `exportDraw` freezes
+the animation clock to a fixed instant before capturing. Verified directly: two `exportDraw`
+calls 900ms apart (long enough for uncontrolled pulse phase to have visibly drifted) produced
+identical PNG data URLs, byte for byte. Per-object animation phase is derived from a
+deterministic string hash of the node/link id — never `Math.random`, never raw wall-clock —
+so the reproducibility guarantee holds without needing to disable animation for export.
+
+Also added: sharper icon textures (256px backing canvas for a 128-unit design space, so a
+criticality-scaled sprite doesn't pixelate), a subtle sheen pass for less-flat silhouettes, a
+deterministically-seeded (not `Math.random`) starfield for background depth, and eased camera
+transitions on fit/zoom button clicks (live drag/wheel stays instant).
+
+Gates: smoke suite now **38/38**. Static gates unaffected (no new dependencies, no offline
+surface changed). Full browser pass re-run: zero console errors, land/maritime confirmed
+coplanar on both scenarios, traveling-glow motion confirmed frame-to-frame, export determinism
+confirmed under load, additive-blended visuals confirmed richer against the dark theme.
+
+Previous update: 2026-07-04 (Loop 8).
 
 ## Loop 8 gate run — 2026-07-04 (STACK view rebuilt as real WebGL)
 

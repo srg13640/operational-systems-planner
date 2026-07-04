@@ -9,12 +9,22 @@
    pass exists in the source either — every "glow" is a layered translucent
    mesh or a radial-gradient sprite texture, which is what this file does too.
 
-   Adaptation from the source: OSP places every domain plane at the SAME
-   scenario geographic footprint (lat/lon bbox), differing only by altitude —
-   real coordinates already separate a naval unit from an inland one, so the
-   source's synthetic "maritime offset square" isn't needed here. Domain
-   layers, colors, and node/link data all come from the live scenario, not a
-   hand-authored scene — this view has no fixed doctrine narrative.
+   Adaptation from the source: every ABSTRACT domain (space/air/ems/cyber/c2/
+   data/strike/sustain) still gets its own plane at the same scenario
+   geographic footprint (lat/lon bbox), stacked by altitude — that vertical
+   ordering is a real "how abstract / how far from the ground" hierarchy. Land
+   and maritime are different in kind, not degree: they are two adjacent
+   PHYSICAL surfaces at the same reference height (sea level / ground level),
+   not one stacked above the other — a coastline doesn't have the ocean
+   floating over (or buried under) the beach. So land and maritime share one
+   SURFACE_ALT tier (a hairline y-epsilon apart only to avoid z-fighting
+   between their two plane meshes) and are distinguished the way real geography
+   already distinguishes them — a naval unit's lat/lon puts it out to sea,
+   an inland unit's lat/lon puts it on the coast — not by a synthetic
+   horizontal offset square the way the source faked it with hand-authored
+   PLAN-view coordinates. Every other domain layer, color, and node/link datum
+   comes from the live scenario, not a hand-authored scene — this view has no
+   fixed doctrine narrative.
 
    Public API mirrors the other renderers (init/render/fit/zoomIn/zoomOut/
    exportDraw/select-by-hit) plus stack-specific hooks used by the rail UI.
@@ -27,11 +37,14 @@
   /* Altitude table (world units) — hand-tuned ordering, low = physical/
      surface, high = abstract/orbital, matching the source's design intent
      but covering OSP's domain vocabulary (adds strike, data; c2 sits above
-     both since it coordinates everything beneath it). */
+     both since it coordinates everything beneath it). Land and maritime are
+     the SAME tier (SURFACE_ALT) — see the file header. */
+  var SURFACE_ALT = 25;
   var DOMAIN_ALT = {
-    land: 20, maritime: 50, other: 65, sustain: 95, strike: 135,
+    land: SURFACE_ALT, maritime: SURFACE_ALT + 2, other: 55, sustain: 95, strike: 135,
     data: 180, c2: 230, cyber: 295, ems: 375, air: 470, space: 620
   };
+  var SURFACE_DOMAINS = { land: 1, maritime: 1 };
   var DOMAIN_ORDER = ['space', 'air', 'ems', 'cyber', 'c2', 'data', 'strike', 'sustain', 'other', 'maritime', 'land'];
   var DOMAIN_COLORS = {
     land: '#5ee3c1', air: '#7ec9ff', maritime: '#4fa3e0', space: '#b189ff',
@@ -57,7 +70,38 @@
   var raf = null;
   var dpr = 1;
 
-  var group = { planes: null, nodes: null, links: null, activities: null, boundary: null };
+  var group = { planes: null, nodes: null, links: null, activities: null, boundary: null, sky: null };
+
+  /* Continuous idle animation (pulsing rings, traveling glow) is what makes
+     this feel alive rather than a still frame — but exports must stay
+     pixel-reproducible (a core product guarantee: two exports of the same
+     selection are byte-identical). The fix used everywhere else in this
+     rule is a deterministic PER-OBJECT phase, never Math.random or wall-clock
+     alone, and exportDraw freezes the clock to a fixed canonical instant so
+     the animation state it captures is a pure function of what's selected,
+     not of when you happened to click export. */
+  function hashPhase(id) {
+    var h = 0;
+    var s = String(id);
+    for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    return (Math.abs(h) % 1000) / 1000 * Math.PI * 2;
+  }
+  /* Tiny seeded PRNG (mulberry32) for the starfield — deterministic, not
+     Math.random, so this file has zero non-reproducible randomness anywhere. */
+  function seededRandom(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var animated = { pulseRings: [], findingHeads: [], activityHeads: [] };
+  var clockFrozenAt = null;   // set during exportDraw so captured frames are reproducible
+  function animClock() {
+    return clockFrozenAt !== null ? clockFrozenAt : performance.now();
+  }
   var nodeSprites = {};                 // nodeId -> { sprite, glow, pulse }
   var textureCache = {};                // painterKey|side|color -> THREE.CanvasTexture
   var labelSpriteCache = {};
@@ -141,12 +185,47 @@
     group.activities = new THREE.Group(); scene.add(group.activities);
     group.nodes = new THREE.Group(); scene.add(group.nodes);
     group.boundary = new THREE.Group(); scene.add(group.boundary);
+    group.sky = buildStarfield();
+    scene.add(group.sky);
 
     orbitState.target = new THREE.Vector3(0, 220, 0);
     updateCameraFromOrbit();
 
     wireInteraction();
     resize();
+  }
+
+  /* Built once at boot, not per render — deterministic (seeded, not
+     Math.random) so nothing about this file depends on real randomness; a
+     slow constant rotation (driven by the same clock as everything else, so
+     it freezes for export too) is the only thing that moves. Purely
+     atmospheric: it carries no data and is never a hit target. */
+  function buildStarfield() {
+    var rand = seededRandom(1337);
+    var count = 420;
+    var positions = new Float32Array(count * 3);
+    for (var i = 0; i < count; i++) {
+      var r = 3200 + rand() * 1400;
+      var theta = rand() * Math.PI * 2;
+      var phi = Math.acos(2 * rand() - 1);
+      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = Math.abs(r * Math.cos(phi)) * 0.6 + 150;
+      positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    var c = document.createElement('canvas');
+    c.width = 32; c.height = 32;
+    var g = c.getContext('2d').createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0, 'rgba(255,255,255,0.9)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    var c2d = c.getContext('2d');
+    c2d.fillStyle = g; c2d.fillRect(0, 0, 32, 32);
+    var mat = new THREE.PointsMaterial({
+      map: new THREE.CanvasTexture(c), size: 9, transparent: true, opacity: 0.55,
+      depthWrite: false, fog: false, blending: THREE.AdditiveBlending
+    });
+    return new THREE.Points(geo, mat);
   }
 
   function themeIsLight() { return document.documentElement.getAttribute('data-theme') === 'light'; }
@@ -162,12 +241,42 @@
     camera.lookAt(o.target);
   }
 
+  /* Programmatic view changes (fit/zoom buttons) ease over ~500ms instead of
+     snapping — a live drag or wheel stays instant (it's the user's own
+     hand), but a button-triggered jump reads as directed camera work, not a
+     glitch. Implemented as lerp targets consumed inside frameLoop so it rides
+     the same render loop as idle animation rather than starting a second one.
+     Uses wall-clock time directly (not animClock()), since camera framing —
+     unlike idle pulse phase — is never part of the export-reproducibility
+     contract; an export mid-tween simply captures wherever the camera is. */
+  var tween = null;
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function tweenOrbitTo(radius, phi, theta, targetPos, duration) {
+    tween = {
+      r0: orbitState.radius, phi0: orbitState.phi, th0: orbitState.theta, tg0: orbitState.target.clone(),
+      r1: radius, phi1: phi, th1: theta, tg1: targetPos.clone(),
+      start: performance.now(), duration: duration || 480
+    };
+    ensureFrameLoop();
+  }
+  function stepTween() {
+    if (!tween) return;
+    var f = Math.min(1, (performance.now() - tween.start) / tween.duration);
+    var e = easeOutCubic(f);
+    orbitState.radius = tween.r0 + (tween.r1 - tween.r0) * e;
+    orbitState.phi = tween.phi0 + (tween.phi1 - tween.phi0) * e;
+    orbitState.theta = tween.th0 + (tween.th1 - tween.th0) * e;
+    orbitState.target.lerpVectors(tween.tg0, tween.tg1, e);
+    updateCameraFromOrbit();
+    if (f >= 1) tween = null;
+  }
+
   function fit() {
-    orbitState.radius = DEFAULT_ORBIT.radius;
-    orbitState.phi = DEFAULT_ORBIT.phi;
-    orbitState.theta = DEFAULT_ORBIT.theta;
-    if (orbitState.target) orbitState.target.set(0, ((activeDomains().length || 1) * 0) + 220, 0);
-    if (ready) { updateCameraFromOrbit(); render(); }
+    if (!ready) return;
+    var target = orbitState.target ? orbitState.target.clone() : new THREE.Vector3(0, 220, 0);
+    target.set(0, 220, 0);
+    tweenOrbitTo(DEFAULT_ORBIT.radius, DEFAULT_ORBIT.phi, DEFAULT_ORBIT.theta, target);
+    render();
   }
 
   var drag = null;
@@ -322,7 +431,12 @@
     c2d.globalCompositeOperation = 'source-over';
   }
 
-  var SZ = 128, CX = 64, CY = 64;
+  /* Painters draw in a 128-unit design space centered at (64,64); the actual
+     backing canvas renders at 2x that (TEX_SZ) so icons stay crisp when a
+     high-criticality sprite scales up on screen — c2d.scale(2,2) below makes
+     every painter's existing CX/CY-relative coordinates map onto the sharper
+     canvas with no changes to the 12 painter functions themselves. */
+  var SZ = 128, CX = 64, CY = 64, TEX_SZ = 256;
 
   var PAINTERS = {
     hqcp: function (c2d, color) {
@@ -487,14 +601,28 @@
     return 'generic';
   }
 
+  /* Subtle upper-left sheen, screen-blended over the finished icon — cheap
+     fake dimensionality (a highlight, not a full relight) so silhouettes read
+     less like flat stickers. */
+  function paintSheen(c2d, color) {
+    var g = c2d.createRadialGradient(CX - 16, CY - 18, 2, CX - 16, CY - 18, 46);
+    g.addColorStop(0, 'rgba(255,255,255,0.30)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    c2d.globalCompositeOperation = 'lighter';
+    c2d.fillStyle = g;
+    c2d.fillRect(0, 0, SZ, SZ);
+    c2d.globalCompositeOperation = 'source-over';
+  }
+
   function nodeTexture(n) {
     var side = n.side === 'Enemy' ? 'enemy' : 'friendly';
     var color = n.side === 'Enemy' ? ENEMY_COLOR : (DOMAIN_COLORS[n.domain] || DOMAIN_COLORS.other);
     var key = pickPainterKey(n) + '|' + side + '|' + color;
     if (textureCache[key]) return textureCache[key];
     var c = document.createElement('canvas');
-    c.width = SZ; c.height = SZ;
+    c.width = TEX_SZ; c.height = TEX_SZ;
     var c2d = c.getContext('2d');
+    c2d.scale(TEX_SZ / SZ, TEX_SZ / SZ);
     var painter = PAINTERS[pickPainterKey(n)] || PAINTERS.generic;
     if (n.side === 'Enemy') {
       c2d.save();
@@ -504,13 +632,16 @@
     } else {
       painter(c2d, color);
     }
+    paintSheen(c2d, color);
     var tex = new THREE.CanvasTexture(c);
     tex.needsUpdate = true;
     textureCache[key] = tex;
     return tex;
   }
 
+  var glowHeadCache = {};
   function makeGlowHeadTexture(color) {
+    if (glowHeadCache[color]) return glowHeadCache[color];
     var c = document.createElement('canvas');
     c.width = 64; c.height = 64;
     var g = c.getContext('2d').createRadialGradient(32, 32, 2, 32, 32, 30);
@@ -519,7 +650,9 @@
     g.addColorStop(1, 'rgba(0,0,0,0)');
     var c2d = c.getContext('2d');
     c2d.fillStyle = g; c2d.fillRect(0, 0, 64, 64);
-    return new THREE.CanvasTexture(c);
+    var tex = new THREE.CanvasTexture(c);
+    glowHeadCache[color] = tex;
+    return tex;
   }
 
   function labelSprite(text, color) {
@@ -552,6 +685,7 @@
   function buildPlanes() {
     clearGroup(group.planes);
     var domains = activeDomains();
+    var surfaceLabelIndex = 0;   // land/maritime stagger their label tag so it doesn't double up
     domains.forEach(function (d) {
       var alt = DOMAIN_ALT[d] * opts.separation;
       var color = new THREE.Color(DOMAIN_COLORS[d] || DOMAIN_COLORS.other);
@@ -571,15 +705,19 @@
 
       var lbl = labelSprite('// ' + d.toUpperCase(), DOMAIN_COLORS[d] || DOMAIN_COLORS.other);
       lbl.scale.set(210, 40, 1);
-      lbl.position.set(-PLANE_W / 2 - 60, alt + 12, -PLANE_D / 2 + 30);
+      /* Surface tier (land/maritime) sits at ~the same altitude by design (see
+         file header) — stagger their tags along Z instead of stacking them at
+         the same corner, where they'd overlap. */
+      var zOff = SURFACE_DOMAINS[d] ? surfaceLabelIndex++ * 46 : 0;
+      lbl.position.set(-PLANE_W / 2 - 60, alt + 12, -PLANE_D / 2 + 30 + zOff);
       group.planes.add(lbl);
     });
 
     // boundary wireframe box spanning the full stack
     clearGroup(group.boundary);
     if (domains.length) {
-      var minY = DOMAIN_ALT[domains[domains.length - 1]] * opts.separation - 15;
-      var maxY = DOMAIN_ALT[domains[0]] * opts.separation + 15;
+      var minY = Math.min.apply(null, domains.map(function (d) { return DOMAIN_ALT[d]; })) * opts.separation - 15;
+      var maxY = Math.max.apply(null, domains.map(function (d) { return DOMAIN_ALT[d]; })) * opts.separation + 15;
       var boxGeo = new THREE.BoxGeometry(PLANE_W + 20, Math.max(30, maxY - minY), PLANE_D + 20);
       var boxEdges = new THREE.EdgesGeometry(boxGeo);
       var boxMat = new THREE.LineBasicMaterial({ color: 0x2a4a63, transparent: true, opacity: 0.4 });
@@ -616,20 +754,28 @@
       nodeSprites[n.id] = { sprite: sprite };
 
       if (score >= 50 && active) {
-        var ringGeo = new THREE.RingGeometry(18, 22, 28);
-        var ringMat = new THREE.MeshBasicMaterial({ color: score >= 75 ? 0xff5d6c : 0xffb347, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false });
+        var ringGeo = new THREE.RingGeometry(18, 23, 32);
+        var ringMat = new THREE.MeshBasicMaterial({
+          color: score >= 75 ? 0xff5d6c : 0xffb347, transparent: true, opacity: 0.6,
+          side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending
+        });
         var ring = new THREE.Mesh(ringGeo, ringMat);
         ring.rotation.x = -Math.PI / 2;
         ring.position.set(p.x, p.y - 5.4, p.z);
         group.nodes.add(ring);
+        animated.pulseRings.push({ mat: ringMat, base: 0.6, speed: 2.1, phase: hashPhase(n.id) });
       }
       if (selId === n.id || fNodes[n.id]) {
-        var selGeo = new THREE.RingGeometry(26, 30, 28);
-        var selMat = new THREE.MeshBasicMaterial({ color: 0x5ee3c1, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false });
+        var selGeo = new THREE.RingGeometry(25, 31, 32);
+        var selMat = new THREE.MeshBasicMaterial({
+          color: 0x5ee3c1, transparent: true, opacity: 0.85,
+          side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending
+        });
         var selRing = new THREE.Mesh(selGeo, selMat);
         selRing.rotation.x = -Math.PI / 2;
         selRing.position.set(p.x, p.y - 5.2, p.z);
         group.nodes.add(selRing);
+        animated.pulseRings.push({ mat: selMat, base: 0.85, speed: 3.1, phase: hashPhase(n.id + '-sel') });
       }
       if (st.layers.graphLabels !== false && opts.labels) {
         var lbl = labelSprite(n.name, active ? '#e8f3ff' : '#6b8091');
@@ -701,12 +847,13 @@
 
       if (emphasized && active) {
         var headTex = makeGlowHeadTexture(HILITE);
-        var headMat = new THREE.SpriteMaterial({ map: headTex, transparent: true, depthTest: false });
+        var headMat = new THREE.SpriteMaterial({ map: headTex, transparent: true, depthTest: false, blending: THREE.AdditiveBlending });
         var head = new THREE.Sprite(headMat);
-        head.scale.set(26, 26, 1);
+        head.scale.set(30, 30, 1);
         var mid = curve.getPoint(0.5);
         head.position.copy(mid);
         group.links.add(head);
+        animated.findingHeads.push({ sprite: head, curve: curve, speed: 0.00055, phase: hashPhase(l.id) });
       }
     });
   }
@@ -736,11 +883,16 @@
       group.activities.add(line);
 
       var headTex = makeGlowHeadTexture('#' + color.getHexString());
-      var headMat = new THREE.SpriteMaterial({ map: headTex, transparent: true, depthTest: false, opacity: fade });
+      var headMat = new THREE.SpriteMaterial({ map: headTex, transparent: true, depthTest: false, opacity: fade, blending: THREE.AdditiveBlending });
       var head = new THREE.Sprite(headMat);
-      head.scale.set(20, 20, 1);
+      head.scale.set(22, 22, 1);
       head.position.copy(b);
       group.activities.add(head);
+      /* Position is driven by the real timeline (act.from/to_hours vs st.t) —
+         never by this animation clock. Only scale pulses, so scrubbing time
+         stays the single source of truth for "where," while the idle loop
+         only adds "this is live" motion on top. */
+      animated.activityHeads.push({ sprite: head, baseScale: 22, speed: 2.6, phase: hashPhase(act.id) });
     });
   }
 
@@ -761,12 +913,17 @@
     scene.fog.color.set(themeIsLight() ? 0xeef1f5 : 0x0a1016);
     renderer.setClearColor(themeIsLight() ? 0xeef1f5 : 0x0a1016, 1);
     var bbox = geoBBoxKm();
+    animated.pulseRings = [];
+    animated.findingHeads = [];
+    animated.activityHeads = [];
     buildPlanes();
     computeWorldPositions(bbox);
     buildLinks();
     buildActivities();
     buildNodes();
+    tickAnimations();   // paint the first frame at a consistent phase, not frozen mid-pulse
     renderer.render(scene, camera);
+    ensureFrameLoop();
   }
 
   function resizeIfNeeded() {
@@ -776,12 +933,45 @@
     if (Math.round(size.x) !== w || Math.round(size.y) !== h) resize();
   }
 
-  function orbitStep() {
-    if (!opts.orbit || document.body.getAttribute('data-view') !== 'stack') { raf = null; return; }
-    orbitState.theta += 0.0022;
-    updateCameraFromOrbit();
-    render();
-    raf = requestAnimationFrame(orbitStep);
+  /* Per-frame idle animation: sine-pulsed ring opacity, a glow head traveling
+     along each emphasized/finding link's arc, and a pulsing (not moving)
+     scale on activity heads. Rebuilds nothing — only touches material
+     opacity / sprite position-scale on the objects `render()` already tagged,
+     so this stays cheap enough to run every frame. */
+  function tickAnimations() {
+    var now = animClock() / 1000;
+    animated.pulseRings.forEach(function (r) {
+      var s = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(now * r.speed + r.phase));
+      r.mat.opacity = r.base * s;
+    });
+    animated.findingHeads.forEach(function (h) {
+      var t = (now * h.speed + h.phase / (Math.PI * 2)) % 1;
+      h.sprite.position.copy(h.curve.getPoint(t));
+    });
+    animated.activityHeads.forEach(function (a) {
+      var s = 1 + 0.22 * (0.5 + 0.5 * Math.sin(now * a.speed + a.phase));
+      a.sprite.scale.set(a.baseScale * s, a.baseScale * s, 1);
+    });
+    if (group.sky) group.sky.rotation.y = now * 0.003;
+  }
+
+  /* One persistent rAF loop drives BOTH idle animation and (when enabled)
+     camera auto-orbit, running whenever the stack view is on screen —
+     independent of the auto-orbit toggle, which only gates whether the
+     camera itself moves. */
+  function frameLoop() {
+    if (document.body.getAttribute('data-view') !== 'stack') { raf = null; return; }
+    if (tween) {
+      stepTween();   // a button-triggered camera ease owns theta this frame
+    } else if (opts.orbit) {
+      orbitState.theta += 0.0022; updateCameraFromOrbit();
+    }
+    tickAnimations();
+    renderer.render(scene, camera);
+    raf = requestAnimationFrame(frameLoop);
+  }
+  function ensureFrameLoop() {
+    if (!raf) raf = requestAnimationFrame(frameLoop);
   }
 
   /* ================= export ================= */
@@ -801,7 +991,14 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    /* Freeze the idle-animation clock to a fixed instant so two exports of
+       the same selection are byte-identical regardless of when in the pulse
+       cycle the user happened to click export — reproducible screenshots are
+       a product guarantee (see the file header note on hashPhase). */
+    clockFrozenAt = 0;
+    tickAnimations();
     renderer.render(scene, camera);
+    clockFrozenAt = null;
     target.drawImage(renderer.domElement, 0, 0, w, h);
     renderer.setSize(prevSize.x, prevSize.y, false);
     camera.aspect = prevAspect;
@@ -817,18 +1014,21 @@
     },
     render: render,
     fit: fit,
-    zoomIn: function () { orbitState.radius = Math.max(400, orbitState.radius * 0.82); updateCameraFromOrbit(); render(); },
-    zoomOut: function () { orbitState.radius = Math.min(4600, orbitState.radius * 1.22); updateCameraFromOrbit(); render(); },
+    zoomIn: function () { tweenOrbitTo(Math.max(400, orbitState.radius * 0.72), orbitState.phi, orbitState.theta, orbitState.target, 280); render(); },
+    zoomOut: function () { tweenOrbitTo(Math.min(4600, orbitState.radius * 1.35), orbitState.phi, orbitState.theta, orbitState.target, 280); render(); },
     exportDraw: exportDraw,
     activeDomains: activeDomains,
     setDomainHidden: function (d, hidden) { hiddenDomains[d] = !!hidden; render(); },
     setSeparation: function (v) { opts.separation = Math.max(0.35, Math.min(2, v / 110)); render(); },
     setLabels: function (v) { opts.labels = !!v; render(); },
     setCrossEmphasis: function (v) { opts.crossEmphasis = !!v; render(); },
-    setOrbit: function (v) { opts.orbit = !!v; if (v && !raf) raf = requestAnimationFrame(orbitStep); },
+    setOrbit: function (v) { opts.orbit = !!v; ensureFrameLoop(); },
     setEnemyVisible: function (v) { opts.enemyVisible = !!v; render(); },
     isReady: function () { return ready; },
     isFailed: function () { return failed; },
-    getBBoxKm: geoBBoxKm
+    getBBoxKm: geoBBoxKm,
+    getOrbitState: function () { return orbitState; },
+    updateCamera: updateCameraFromOrbit,
+    getDomainAlt: function (d) { return DOMAIN_ALT[d]; }
   };
 })();
