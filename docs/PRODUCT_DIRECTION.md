@@ -39,9 +39,9 @@ it to a senior leader from a projected screen — no server, no install rights, 
 3. **Place in context** — entities sit at lat/lon on the offline basemap (unplaced entities go
    to a visible tray, never silently dropped); nodes, links, and activities carry phase/time
    membership so the system exists in time, not just topology.
-4. **Interrogate** — switch Map / Graph / Risk while scrubbing the timeline; criticality scores
-   and vulnerability findings recompute for the active phase; the inspector shows the score's
-   component breakdown and plain-English "so what" for anything selected.
+4. **Interrogate** — switch Map / Graph / Stack / Risk while scrubbing the timeline; criticality
+   scores and vulnerability findings recompute for the active phase; the inspector shows the
+   score's component breakdown and plain-English "so what" for anything selected.
 5. **Assert** — pin auto-detected findings or add analyst-asserted ones (evidence / implication /
    mitigation); analyst assertions render visually distinct from computed findings.
 6. **Export** — a banner-stamped PNG of the current view (deterministic layout ⇒ reproducible
@@ -49,17 +49,22 @@ it to a senior leader from a projected screen — no server, no install rights, 
 
 ## Primary surfaces
 
-Three canvas views, one shared selection, one shared timeline. Everything else is a modal or a
+Four canvas views, one shared selection, one shared timeline. Everything else is a modal or a
 chrome state — never a peer tab (the six-equal-tabs pattern was a source weakness).
 
-1. **MAP (default)** — operational context. Entities at real coordinates on the vendored NASA
-   Blue Marble Indo-Pacific crop, dependency links over terrain, activity markers that appear/
-   move/expire with the scrub, unplaced-entities tray, FM 1-02.2 unit symbols. Opening cold to a
-   map, not an abstract graph, was the single biggest credibility lesson in the source reviews.
+1. **MAP (default)** — operational context. Entities at real coordinates on a global NASA Blue
+   Marble basemap (local tile pyramid — any theater, not just the Indo-Pacific), dependency
+   links over terrain, activity markers that appear/move/expire with the scrub,
+   unplaced-entities tray, MIL-STD-2525C unit symbology. Opening cold to a map, not an abstract
+   graph, was the single biggest credibility lesson in the source reviews.
 2. **GRAPH** — system structure. Hierarchy and network layouts of the same dataset,
    deterministic converged non-overlapping layout, criticality color lens, vulnerability chain
    halos, 2-hop neighborhood isolate.
-3. **RISK** — the "so what" board. Ranked criticality table with per-component breakdown bars,
+3. **STACK** — every domain in the scenario as a layer in a real WebGL 3D stack, nodes at their
+   geographic position on their domain plane, cross-domain dependencies as glowing arcs. The
+   same finding that lights up on Map and Graph lights up here too, crossing every domain it
+   touches — the clearest single view of "what breaks, across how much of the system."
+4. **RISK** — the "so what" board. Ranked criticality table with per-component breakdown bars,
    finding cards (evidence / implication / mitigation) split auto-detected vs analyst-asserted,
    live weight sliders, an auto-generated BLUF paragraph. Time-aware: the board answers "what
    matters NOW," and findings can emerge or resolve as the scrubber moves.
@@ -149,8 +154,15 @@ label annotation tools with undo, saved named briefing snapshots + batch export,
 MapLibre+PMTiles basemap upgrade, milsymbol-grade symbology options, template pack + AI data
 workflow docs.
 
-**Explicitly not:** 3D globe, live feeds, multi-user/server anything, access control,
-simulation, in-app slide decks. (Revised 2026-07-04: the multi-domain *stack* view — originally
-deferred with the 3D family — was promoted to a first-class surface by owner decision, rebuilt
-data-driven on a dependency-free canvas renderer rather than ported from the Three.js
-prototype. The 3D globe remains out.)
+**Explicitly not:** live feeds, multi-user/server anything, access control, simulation,
+in-app slide decks. (Revised 2026-07-04, twice. First pass: the multi-domain *stack* view —
+originally deferred with the 3D family — was promoted to a first-class surface, initially
+rebuilt on a dependency-free canvas renderer. Second pass, same day: the owner asked
+specifically to match the fidelity of the original Three.js/WebGL prototype, so the stack view
+was rebuilt again — this time as real WebGL, with Three.js vendored locally, no CDN, loaded via
+a blob-URL bootstrap that works over `file://`. This is OSP's first runtime dependency; it
+ships in the repo and is covered by the same offline gates as everything else. What was NOT
+ported: the source's fixed 5-phase doctrine narrative (COMPETE/SHAPE/PENETRATE/DIS-INTEGRATE/
+EXPLOIT with scripted discussion questions) — that is advocacy content for one specific
+briefing, and OSP's phases stay scenario-defined. The rendering technique, camera model, and
+briefing tools (spotlight) were ported faithfully; the doctrine script was not.)

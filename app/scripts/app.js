@@ -159,6 +159,10 @@
     $('railTitle').textContent = railMeta[state.view][0];
     $('railHint').textContent = railMeta[state.view][1];
     rebuildStackLayers();
+    if (state.view === 'stack' && OSP.renderStack.isReady()) {
+      var km = OSP.renderStack.getBBoxKm();
+      $('stackAoReadout').textContent = km.kmEW + ' × ' + km.kmNS + ' km operating area (from placed entities)';
+    }
 
     // per-view chrome
     $('betweennessCaveat').style.display = state.metricsInfo.betweennessSkipped ? 'block' : 'none';
@@ -352,6 +356,7 @@
   }
 
   function setView(v) {
+    if (state.view === 'stack' && v !== 'stack') exitSpotlight();
     state.view = v;
     state.scenario.layout.view = v;
     renderAll();
@@ -524,8 +529,12 @@
       OSP.renderStack.setSeparation(parseFloat(this.value));
     });
     $('chkStackLabels').addEventListener('change', function () { OSP.renderStack.setLabels(this.checked); });
+    bindCheck('chkStackLinks', 'links');
     $('chkCrossDomain').addEventListener('change', function () { OSP.renderStack.setCrossEmphasis(this.checked); });
+    $('chkStackEnemy').addEventListener('change', function () { OSP.renderStack.setEnemyVisible(this.checked); });
     $('chkOrbit').addEventListener('change', function () { OSP.renderStack.setOrbit(this.checked); });
+    $('btnStackReset').addEventListener('click', function () { OSP.renderStack.fit(); });
+    $('btnSpotlight').addEventListener('click', toggleSpotlight);
 
     // risk filters
     $('chkShowAuto').addEventListener('change', function () { state.riskFilters.showAuto = this.checked; renderAll(); });
@@ -609,6 +618,8 @@
     $('btnExportFindings').addEventListener('click', function () { toast('Exported ' + OSP.exporter.exportFindings()); });
     $('btnLoadPacific').addEventListener('click', function () { loadBuiltin('pacific', 'PACIFIC SENTINEL'); });
     $('btnLoadBaltic').addEventListener('click', function () { loadBuiltin('baltic', 'BALTIC SENTINEL'); });
+
+    wireSpotlight();
 
     // keyboard
     window.addEventListener('keydown', onKey);
@@ -694,6 +705,52 @@
     renderAll();
   }
 
+  /* ---------- spotlight (briefing tool: cursor-follow dim, click-to-lock) ---------- */
+  /* Pure CSS radial-gradient overlay (see #spotlightOverlay in main.css) — this
+     code only ever sets --spot-x/--spot-y as percentages of the canvas area, so
+     it dims whatever is under it (currently wired for the stack view) without
+     any awareness of what that content is. */
+  var spotlightLocked = false;
+
+  function toggleSpotlight() {
+    var on = !document.body.classList.contains('spotlight-active');
+    document.body.classList.toggle('spotlight-active', on);
+    $('btnSpotlight').classList.toggle('active', on);
+    spotlightLocked = false;
+    if (!on) {
+      $('canvasArea').style.removeProperty('--spot-x');
+      $('canvasArea').style.removeProperty('--spot-y');
+    }
+  }
+
+  function exitSpotlight() {
+    if (!document.body.classList.contains('spotlight-active')) return false;
+    toggleSpotlight();
+    return true;
+  }
+
+  function wireSpotlight() {
+    var area = $('canvasArea');
+    area.addEventListener('mousemove', function (e) {
+      if (!document.body.classList.contains('spotlight-active') || spotlightLocked) return;
+      setSpotAt(e);
+    });
+    area.addEventListener('click', function (e) {
+      if (!document.body.classList.contains('spotlight-active')) return;
+      setSpotAt(e);
+      spotlightLocked = !spotlightLocked;
+    }, true);
+  }
+
+  function setSpotAt(e) {
+    var area = $('canvasArea');
+    var r = area.getBoundingClientRect();
+    var x = ((e.clientX - r.left) / r.width) * 100;
+    var y = ((e.clientY - r.top) / r.height) * 100;
+    area.style.setProperty('--spot-x', x + '%');
+    area.style.setProperty('--spot-y', y + '%');
+  }
+
   function onKey(e) {
     var tag = (document.activeElement && document.activeElement.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
@@ -722,8 +779,10 @@
     else if (k === '/') { e.preventDefault(); $('searchBox').focus(); $('searchBox').select(); }
     else if (k === '?') openModal('helpOverlay');
     else if (k === '\\') document.body.classList.toggle('rail-collapsed');
+    else if ((k === 's' || k === 'S') && state.view === 'stack') toggleSpotlight();
     else if (k === 'Escape') {
-      if (OSP.editor.isPlacing()) { OSP.editor.cancelPlacing(); toast('Placement cancelled.'); }
+      if (exitSpotlight()) { /* handled */ }
+      else if (OSP.editor.isPlacing()) { OSP.editor.cancelPlacing(); toast('Placement cancelled.'); }
       else if (anyModalOpen()) closeAllModals();
       else if (state.briefMode) toggleBrief();
       else if (state.isolate) { state.isolate = false; renderAll(); }

@@ -120,12 +120,22 @@
           <input type="range" id="stackSep" min="40" max="170" step="5" value="110">
         </div>
         <label class="checkRow"><input type="checkbox" id="chkStackLabels" checked> Node labels</label>
+        <label class="checkRow"><input type="checkbox" id="chkStackLinks" checked> Dependency links</label>
         <label class="checkRow"><input type="checkbox" id="chkCrossDomain" checked> Emphasize cross-domain links</label>
+        <label class="checkRow"><input type="checkbox" id="chkStackEnemy" checked> Show enemy (OPFOR)</label>
         <label class="checkRow"><input type="checkbox" id="chkOrbit"> Auto-orbit (briefing)</label>
+        <div class="row" style="margin-top:6px">
+          <button class="inspBtn" id="btnStackReset">Reset view</button>
+          <button class="inspBtn" id="btnSpotlight" title="Spotlight — dim the scene, follow the cursor; click to lock (S)">Spotlight</button>
+        </div>
+      </div>
+      <div class="railSection">
+        <h3>Area of operations</h3>
+        <div class="hint" id="stackAoReadout">—</div>
       </div>
       <div class="railSection">
         <h3>Reading the stack</h3>
-        <div class="hint">Nodes sit on their domain plane at their geographic position. Vertical arcs are cross-domain dependencies — select a finding and its chain lights up across the layers. Drag to orbit, wheel to zoom.</div>
+        <div class="hint">Nodes sit on their domain plane at their real geographic position. Vertical arcs are cross-domain dependencies — select a finding and its chain lights up across the layers. Drag to orbit, Shift+drag to pan, wheel to zoom.</div>
       </div>
     </div>
 
@@ -151,7 +161,8 @@
   <section id="canvasArea">
     <canvas id="mapCanvas"></canvas>
     <svg id="graphSvg" xmlns="http://www.w3.org/2000/svg"></svg>
-    <canvas id="stackCanvas"></canvas>
+    <div id="stackCanvas"></div>
+    <div id="spotlightOverlay"></div>
     <div id="riskBoard"></div>
 
     <div id="phaseCaption" class="canvasChrome"></div>
@@ -296,6 +307,8 @@
 <script src="scripts/render-graph.js"></script>
 <script src="scripts/render-map.js"></script>
 <script src="scripts/render-risk.js"></script>
+<script src="lib/three/three.module.b64.js"></script>
+<script src="lib/three/three-loader.js"></script>
 <script src="scripts/render-stack.js"></script>
 <script src="scripts/inspector.js"></script>
 <script src="scripts/editor.js"></script>

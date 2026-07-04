@@ -1,6 +1,58 @@
 # Verification
 
-Updated: 2026-07-04 (Loop 7).
+Updated: 2026-07-04 (Loop 8).
+
+## Loop 8 gate run — 2026-07-04 (STACK view rebuilt as real WebGL)
+
+The user showed a screenshot of the actual prior prototype (Three.js/WebGL, glowing
+volumetric domain layers, hand-drawn doctrine icons, orbit camera, spotlight tool) and asked
+for that fidelity specifically. Loop 7's canvas-2D stack was a good-faith simplification, not
+a match — this loop replaces its internals with real WebGL, porting the source's actual
+rendering techniques (confirmed by reading its code directly, not guessing).
+
+**A real bug caught before it shipped**: the first working version used a bare incrementing
+counter (`trayXZ`) to place unplaced (no lat/lon) entities, called independently from three
+different builder functions each frame — the same node landed in a different tray slot in
+each pass, so its links would render disconnected from its own sprite. Fixed by computing one
+shared, memoized `id → world position` map once per frame (`computeWorldPositions`), consumed
+by every builder. Caught by code review before any browser testing, not by a user report.
+
+**A real loader bug caught during first browser test**: the initial three-loader.js dynamic-
+imported a single blob: URL for `three.module.min.js`, which failed immediately —
+`TypeError: Failed to resolve module specifier "./three.core.min.js"` — because the module
+build internally imports a second file via a relative specifier, which cannot resolve against
+a blob: base URL. Fixed by porting the source's actual two-blob chain (vendor both files,
+mint a blob: URL for the core file first, text-rewrite the module's internal import string to
+point at it, blob the rewritten text, import that). Verified in the live browser afterward:
+`window.THREE.REVISION === "184"`, zero console errors.
+
+**Gates**:
+- Headless smoke suite: **36/36 PASS**, including a new check that jsdom's inevitable WebGL
+  absence is handled gracefully — `OSP.renderStack.isFailed() === true`, zero thrown errors,
+  fallback message present, and (critically) every other check that touches map/graph/risk/
+  editor/scenarios is unaffected.
+- Static gates (`gates.sh`) extended, not relaxed, to cover the new dependency: the CDN-host
+  grep now scans `lib/` too (vendored files could theoretically embed a CDN fallback URL —
+  confirmed clean); a new targeted check asserts `three-loader.js` only ever dynamic-imports
+  `blob:` URLs it constructed itself, never a literal `http(s)://` string. The fetch/XHR/
+  WebSocket gate stays scoped to app-authored code, since Three.js's unused `FileLoader`/
+  `TextureLoader` utility classes legitimately contain those tokens without OSP ever calling
+  them with a URL — scanning `lib/` for those specific tokens would be a permanent false
+  positive, not a real signal.
+- Browser pass (all via live interaction, not assumption): orbit drag, wheel zoom, click-to-
+  select with raycasting, finding-selection glow chain crossing multiple domain planes,
+  per-domain layer visibility toggle, enemy/OPFOR visibility toggle, spotlight tool (CSS
+  radial-gradient dim + click-lock, `S` hotkey, Esc release), reset-view button, dark/light
+  theme correctly flipping the WebGL clear color and fog color live, brief mode collapsing to
+  full width, window resize, PNG export (`exportDraw` renders a fresh frame at target
+  resolution and blits it — verified non-blank via pixel sampling with real tonal variation,
+  not a uniform fill), and both built-in scenarios (Pacific's 9 domains, Baltic's 10 including
+  `land`) rendering correctly. Zero console errors and zero failed network requests throughout.
+- Offline re-confirmed with the vendored dependency in place: DevTools-equivalent network log
+  during the full pass above shows no non-local requests; Three.js and milsymbol are fully
+  local; the blob: URL construction happens from locally-embedded base64, never fetched.
+
+Previous update: 2026-07-04 (Loop 7).
 
 ## Loop 7 gate run — 2026-07-04 (multi-domain STACK view)
 

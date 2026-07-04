@@ -6,17 +6,18 @@
 **Model a mission system as a dependency graph, place it in global geographic and temporal
 context, and see what breaks, where, and when — then export a briefable artifact.**
 
-OSP is a planning aid for staff officers, analysts, and wargamers. One dataset drives three
-linked surfaces — an operational **map**, a system **graph**, and a **risk board** — under a
-shared timeline. Scrub the clock and the risk picture changes: a ground station that is merely
-busy at H+12 becomes a single point of failure at H+48 when the fiber trunk is cut. Every
-score is decomposable, every finding carries evidence / "so what" / mitigation in plain
-English, and every visual exports with its classification banner burned in.
+OSP is a planning aid for staff officers, analysts, and wargamers. One dataset drives four
+linked surfaces — an operational **map**, a system **graph**, a multi-domain 3D **stack**, and
+a **risk board** — under a shared timeline. Scrub the clock and the risk picture changes: a
+ground station that is merely busy at H+12 becomes a single point of failure at H+48 when the
+fiber trunk is cut. Every score is decomposable, every finding carries evidence / "so what" /
+mitigation in plain English, and every visual exports with its classification banner burned in.
 
 **[Try it live](https://srg13640.github.io/operational-systems-planner/)** — or clone and
-double-click `app/index.html`. No build, no server, no runtime network calls: the entire app,
-including a global NASA Blue Marble basemap and MIL-STD-2525 symbology, ships in the folder
-and runs air-gapped.
+double-click `app/index.html`. No build, no server: the entire app — a global NASA Blue Marble
+basemap, MIL-STD-2525 symbology, and a WebGL multi-domain stack (Three.js, vendored locally,
+no CDN) — ships in the folder and makes zero runtime network calls, whether you open it from
+this repo's Pages deployment or hand-carry it to a closed network.
 
 ## The 60-second demo
 
@@ -41,11 +42,12 @@ and runs air-gapped.
 - **GRAPH** — network and hierarchy layouts with deterministic, reproducible positioning
   (0.000px drift across loads — screenshots taken minutes apart match), criticality color
   lens, vulnerability chain overlays, 2-hop isolate.
-- **STACK** — a multi-domain 3D stack (hand-rolled perspective renderer, no WebGL, no
-  libraries): every domain in the scenario becomes a layer, nodes sit on their domain plane at
-  their geographic position, and cross-domain dependencies draw as vertical arcs — select a
-  finding and its chain lights up from seabed to space. Orbit, zoom, layer toggles, a
-  separation slider, and auto-orbit for briefings.
+- **STACK** — a multi-domain 3D stack, real WebGL via a locally vendored Three.js (no CDN):
+  every domain in the scenario becomes a glowing translucent layer, nodes sit on their domain
+  plane at their real geographic position as hand-drawn icon sprites, and cross-domain
+  dependencies draw as glowing arcs — select a finding and its chain lights up from seabed to
+  space. Orbit camera, zoom, per-domain layer toggles, an enemy/OPFOR visibility toggle, a
+  spotlight briefing tool, auto-orbit, and a computed area-of-operations readout.
 - **RISK** — BLUF paragraph, ranked criticality with per-component score bars and live weight
   sliders, finding cards split auto-detected vs analyst-asserted, and emergent findings tagged
   with the hour they appeared.
@@ -81,15 +83,17 @@ Same engine, opposite sides of the planet — scenarios are not tied to any thea
 ## Verify
 
 ```sh
-npm install        # jsdom, dev-only — the app itself has zero runtime dependencies
-npm run verify     # static gates (syntax, offline discipline) + 33-check headless smoke suite
+npm install        # jsdom, dev-only test runner — see "third-party assets" below for what ships to users
+npm run verify     # static gates (syntax, offline discipline) + 36-check headless smoke suite
 ```
 
 CI runs the same pipeline on every push. Gates include: zero console errors on boot, pinned
 demo-data counts with zero validation issues, layout determinism ≤1px across cold loads, the
-phase-emergent finding firing at H+48 and not at H+12, JSON round-trip losslessness, and
-editor add/edit/undo integrity. See [docs/VERIFICATION.md](docs/VERIFICATION.md) for the full
-gate history, including how the basemap tile pyramid was pixel-verified.
+phase-emergent finding firing at H+48 and not at H+12 (in both built-in scenarios), JSON
+round-trip losslessness, editor add/edit/undo integrity, and a graceful, error-free fallback
+for the WebGL stack view when no GPU context is available. See
+[docs/VERIFICATION.md](docs/VERIFICATION.md) for the full gate history, including how the
+basemap tile pyramid and the Three.js file://-loading bootstrap were verified.
 
 ## Design principles
 
@@ -113,6 +117,6 @@ consolidated from; their 1.5GB source trees are preserved locally, not in this r
 ## License & provenance
 
 MIT (see [LICENSE](LICENSE)). Bundled: [milsymbol](https://github.com/spatialillusions/milsymbol)
-(MIT) and NASA Blue Marble Next Generation imagery (public domain). All scenario data is
-fictional and unclassified, generated for demonstration; this is a planning aid, not a system
-of record, and predicts no outcomes.
+(MIT), [Three.js](https://github.com/mrdoob/three.js) (MIT), and NASA Blue Marble Next
+Generation imagery (public domain). All scenario data is fictional and unclassified, generated
+for demonstration; this is a planning aid, not a system of record, and predicts no outcomes.

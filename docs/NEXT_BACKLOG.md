@@ -60,12 +60,30 @@ current demo; the shipped slice is complete and verified (see `VERIFICATION.md`)
     `migrateWorkspaceCoords`).
 16. **Performance pass for 250+ node scenarios.** Incremental SVG updates instead of
     innerHTML re-render on selection; spatial index for map hit-testing.
+17. **Generalize the spotlight briefing tool.** Shipped in Loop 8 scoped to the STACK view
+    (CSS radial-gradient dim, cursor-follow or click-lock, `S` hotkey); the implementation in
+    `app.js` is already view-agnostic (it just dims `#canvasArea`) — wiring it up for Map and
+    Graph too is a small, low-risk follow-on.
+18. **Telestrate / draw-annotation tool.** The source prototype's pencil tool (per-view stroke
+    storage, undo/clear, pointer-capture drawing, `shadowBlur` glow) was deliberately not
+    ported in Loop 8 — it's a genuinely separate feature (its own undo stack, persistence
+    model) better scoped on its own rather than half-integrated alongside the WebGL rebuild.
+    Folds naturally into backlog item #2 (map annotation tools).
+19. **Stack-view icon set depth.** Loop 8 ported 12 painter functions (down from the source's
+    ~18) covering OSP's `node_type`/`domain`/`branch_type` vocabulary; extend with dedicated
+    silhouettes for cavalry/mortar/engineer-specific icons if a scenario's density warrants it
+    (currently these fall back to a shared painter — `armor` or `facility`).
 
 ## Explicitly rejected (do not resurrect without new evidence)
 
-- 3D globe — still rejected. (The multi-domain *stack* half of this item was promoted by owner
-  decision 2026-07-04 and shipped in Loop 7 as the STACK view — rebuilt data-driven on a
-  dependency-free canvas perspective renderer, not ported from the Three.js prototype.)
+- 3D globe (a rotating whole-Earth view, distinct from the multi-domain stack) — still
+  rejected. (The stack half of this old item was promoted by owner decision 2026-07-04 and
+  shipped in Loop 7 as a canvas-2D approximation, then rebuilt in Loop 8 as real WebGL — see
+  `docs/ARCHITECTURE.md`'s STACK view section for what was and wasn't ported from the source.)
+- The source's fixed 5-phase doctrine narrative (COMPETE/SHAPE/PENETRATE/DIS-INTEGRATE/
+  EXPLOIT with scripted discussion questions per phase) — deliberately not ported in Loop 8
+  even while porting its rendering fidelity. That is advocacy content for one specific
+  briefing; OSP's phases stay scenario-defined. Revisit only on an explicit, separate request.
 - Live feeds, COP integration, multi-user, server anything.
 - In-app slide builder / narrated tour / auto-play briefing.
 - Simulation or outcome prediction.

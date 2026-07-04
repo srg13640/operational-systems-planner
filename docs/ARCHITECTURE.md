@@ -8,12 +8,18 @@ Updated: 2026-07-03
   `python3 -m http.server` is a dev convenience only.
 - Zero runtime network calls. No CDN, no fetch of remote resources, no telemetry, no webfonts.
   Every byte ships in the folder (IL5-portable / closed-network assumption from both sources).
-- No build step, no npm at runtime, no ES modules (`import` breaks over `file://` in Chrome —
-  proven failure in FSP v1.3). Plain `<script src>` tags in dependency order.
+- No build step, no npm at runtime, no `<script type="module">` (a static `import` declaration
+  breaks over `file://` in Chrome — proven failure in FSP v1.3). Plain `<script src>` tags in
+  dependency order. The one narrow exception is `lib/three/three-loader.js`: a classic script
+  that calls the dynamic `import()` *function* (not a static declaration) on a `blob:` URL it
+  constructs itself from a locally-embedded base64 payload — `blob:` URLs are exempt from the
+  file:// restriction that breaks static imports, and no bundler or build step is involved.
 - Seed data lives in a `<script type="application/json">` island in `index.html` because
   `fetch()` of local JSON fails over `file://`. `app/data/*.json` holds the human-readable
   authoring copies.
-- Vanilla JS/CSS/HTML. jsdom is the only dev dependency (tests only, never shipped to users).
+- Vanilla JS/CSS/HTML, plus one vendored runtime dependency (Three.js, for the STACK view —
+  see its section below for why and how it stays offline-safe). jsdom is the only dev
+  dependency (tests only, never shipped to users).
 
 ## Folder structure
 
@@ -33,12 +39,24 @@ app/
 │   ├── render-graph.js     SVG graph view
 │   ├── render-map.js       canvas map view
 │   ├── render-risk.js      risk board view
-│   ├── render-stack.js     multi-domain 3D stack (hand-rolled perspective, canvas 2D)
+│   ├── render-stack.js     multi-domain 3D stack (real WebGL via vendored Three.js)
 │   ├── editor.js           in-app editing: forms, add/delete, place-on-map, snapshot undo
 │   ├── inspector.js        selection inspector panel
 │   ├── export.js           PNG model-redraw export, banner/title-block stamping
 │   └── app.js              state store, wiring, timeline, keyboard, persistence, boot
 ├── lib/
+│   ├── three/
+│   │   ├── three.module.min.js   vendored Three.js r184 (MIT) — WebGL 3D engine
+│   │   ├── three.core.min.js     Three.js core (the module build imports this internally)
+│   │   ├── three.module.b64.js   both files above, base64-encoded as plain `window.__OSP_THREE_*_B64`
+│   │   │                         string constants — a classic script, safe to load over file://
+│   │   ├── three-loader.js       classic script; decodes the payloads, text-rewrites the
+│   │   │                         module's internal relative import to point at a blob: URL for
+│   │   │                         core, blobs the rewritten module text, and dynamic-imports
+│   │   │                         THAT blob: URL. Sets window.THREE; fires 'three-ready' or
+│   │   │                         'three-unavailable' on document. This is OSP's first runtime
+│   │   │                         dependency — see the STACK view note below for why.
+│   │   └── LICENSE               Three.js MIT license
 │   ├── basemap/
 │   │   └── world/            GLOBAL basemap tile pyramid — NASA Blue Marble topo.bathy
 │   │       ├── world_4096.jpg          L0: whole Earth, always loaded (4096×2048)
@@ -51,13 +69,55 @@ app/
 │       └── LICENSE
 ├── data/
 │   └── pacific_sentinel.json    authoring copy of the embedded demo scenario
+├── data/
+│   └── baltic_sentinel.json     authoring copy of the second built-in demo scenario
 └── tests/
+    ├── gates.sh            static gates: syntax, offline discipline, console hygiene, assets
     ├── harness.js          jsdom loader: console-clean, node positions, view switching
-    └── measure.js          pass/fail smoke gate (exit code) — run `npm i jsdom && node tests/measure.js`
+    └── measure.js          pass/fail smoke gate (exit code) — `npm run verify` runs both
 ```
 
 `model.js`, `metrics.js`, `findings.js`, `layout.js`, `geo.js`, `io.js` are pure modules
 (attach to `window.OSP.*`, no DOM access) so the jsdom harness can unit-test them directly.
+
+### STACK view — real WebGL, and why
+
+The stack view renders every domain in the scenario as a translucent plane at a hand-tuned
+altitude (space highest, land lowest; land and maritime sit at the scenario's actual
+geographic footprint rather than a synthetic offset square, since real lat/lon already keeps
+a naval unit separate from an inland one), with nodes as canvas-drawn, halo-glowing billboard
+sprites and cross-domain dependencies as glowing Bezier arcs. It was rebuilt twice in one day:
+first as a canvas-2D approximation, then — at the owner's request to match a specific prior
+prototype's fidelity — as genuine WebGL, porting that prototype's actual techniques rather
+than re-deriving them:
+
+- **No bloom post-process anywhere** (confirmed absent in the source too). Every "glow" is
+  either a layered translucent `MeshBasicMaterial` disc/ring (`depthWrite:false`), a
+  radial-gradient `CanvasTexture` on a sprite, or a `destination-over` composited halo painted
+  *behind* a hand-drawn canvas silhouette before that canvas becomes a sprite texture.
+- **Hand-rolled spherical orbit camera** (`radius/phi/theta` around a target point) — not
+  `THREE.OrbitControls`. Drag orbits, Shift+drag pans, wheel zooms.
+- **18-ish icon painters → 12 in OSP's port**, each ending in the same `paintHalo()` helper;
+  dispatch keyed off `node_type`/`domain`/`symbol.branch_type` rather than the source's
+  unit-specific vocabulary.
+- **Vendored, not CDN.** Three.js r184 ships as an ES module that internally imports a second
+  file (`three.core.min.js`) via a relative specifier — which cannot resolve against a `blob:`
+  base URL. `three-loader.js` ports the source's fix exactly: decode both files from base64
+  (carried in a plain classic script so they load safely over `file://`), mint a `blob:` URL
+  for the core file, text-rewrite the module's internal import to point at that URL, blob the
+  rewritten module source, and dynamic-`import()` *that*. Works identically over `file://` and
+  `http://` — no dual-path fallback needed. This is OSP's first runtime dependency; the offline
+  gates were extended (not relaxed) to cover it — see `docs/VERIFICATION.md`.
+- **Graceful, tested fallback.** If WebGL/Three.js fails to initialize (disabled GPU, or
+  jsdom, which has no WebGL context), the view shows a plain message and every other surface
+  keeps working. The headless smoke suite exercises exactly this path.
+- **Deliberately not ported**: the source prototype's fixed 5-phase doctrine narrative
+  (COMPETE/SHAPE/PENETRATE/DIS-INTEGRATE/EXPLOIT with scripted discussion questions per phase)
+  — that is advocacy content authored for one specific briefing. OSP's phases stay
+  scenario-defined, consistent with the product's anti-goal against doctrine-argument surfaces.
+- **One shared position map per frame** (`computeWorldPositions`) — nodes, their links, and
+  their activity vectors all read from the same memoized id→world-position lookup, so an
+  unplaced (no lat/lon) entity's sprite and its links never drift apart across builders.
 
 ## Data contract — `osp-scenario` v1.0
 
