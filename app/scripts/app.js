@@ -148,13 +148,17 @@
     // rail sections
     $('railMap').style.display = state.view === 'map' ? '' : 'none';
     $('railGraph').style.display = state.view === 'graph' ? '' : 'none';
+    $('railStack').style.display = state.view === 'stack' ? '' : 'none';
     $('railRisk').style.display = state.view === 'risk' ? '' : 'none';
-    $('railTitle').textContent = state.view === 'map' ? 'Operational map' : state.view === 'graph' ? 'System graph' : 'Risk board';
-    $('railHint').textContent = state.view === 'map'
-      ? 'Entities at real coordinates. Scrub time to change the fight.'
-      : state.view === 'graph'
-        ? 'Structure is stable across time; dimmed entities are out of the current phase.'
-        : 'What matters now, what breaks, and why.';
+    var railMeta = {
+      map: ['Operational map', 'Entities at real coordinates. Scrub time to change the fight.'],
+      graph: ['System graph', 'Structure is stable across time; dimmed entities are out of the current phase.'],
+      stack: ['Multi-domain stack', 'One system across every domain — vertical arcs are cross-domain dependencies.'],
+      risk: ['Risk board', 'What matters now, what breaks, and why.']
+    };
+    $('railTitle').textContent = railMeta[state.view][0];
+    $('railHint').textContent = railMeta[state.view][1];
+    rebuildStackLayers();
 
     // per-view chrome
     $('betweennessCaveat').style.display = state.metricsInfo.betweennessSkipped ? 'block' : 'none';
@@ -177,6 +181,7 @@
     // active view
     if (state.view === 'map') OSP.renderMap.render();
     else if (state.view === 'graph') OSP.renderGraph.render();
+    else if (state.view === 'stack') OSP.renderStack.render();
     else OSP.renderRisk.render();
     OSP.inspector.render();
   }
@@ -513,6 +518,15 @@
     bindCheck('lyrLabels', 'labels'); bindCheck('chkChains', 'chains');
     bindCheck('chkGraphLabels', 'graphLabels');
 
+    // stack controls
+    $('stackSep').addEventListener('input', function () {
+      $('sepVal').textContent = this.value;
+      OSP.renderStack.setSeparation(parseFloat(this.value));
+    });
+    $('chkStackLabels').addEventListener('change', function () { OSP.renderStack.setLabels(this.checked); });
+    $('chkCrossDomain').addEventListener('change', function () { OSP.renderStack.setCrossEmphasis(this.checked); });
+    $('chkOrbit').addEventListener('change', function () { OSP.renderStack.setOrbit(this.checked); });
+
     // risk filters
     $('chkShowAuto').addEventListener('change', function () { state.riskFilters.showAuto = this.checked; renderAll(); });
     $('chkShowAnalyst').addEventListener('change', function () { state.riskFilters.showAnalyst = this.checked; renderAll(); });
@@ -623,7 +637,33 @@
   }
 
   function activeRenderer() {
-    return state.view === 'graph' ? OSP.renderGraph : OSP.renderMap;
+    if (state.view === 'graph') return OSP.renderGraph;
+    if (state.view === 'stack') return OSP.renderStack;
+    return OSP.renderMap;
+  }
+
+  /* Stack rail: one visibility checkbox per domain actually present in the
+     scenario, with live node counts. Rebuilt only when the scenario changes. */
+  var stackLayersRev = -1;
+  function rebuildStackLayers() {
+    if (stackLayersRev === state.scenarioRev) return;
+    stackLayersRev = state.scenarioRev;
+    var box = $('stackLayers');
+    var counts = {};
+    state.fullGraph.nodes.forEach(function (n) {
+      var d = n.domain || 'other';
+      counts[d] = (counts[d] || 0) + 1;
+    });
+    box.innerHTML = '';
+    OSP.renderStack.activeDomains().forEach(function (d) {
+      var label = document.createElement('label');
+      label.className = 'checkRow';
+      label.innerHTML = '<input type="checkbox" checked> ' + d + ' <span style="color:var(--fg-dim)">(' + (counts[d] || 0) + ')</span>';
+      label.querySelector('input').addEventListener('change', function () {
+        OSP.renderStack.setDomainHidden(d, !this.checked);
+      });
+      box.appendChild(label);
+    });
   }
 
   function openModal(id) { $(id).classList.add('open'); }
@@ -668,7 +708,8 @@
     }
     if (k === '1') setView('map');
     else if (k === '2') setView('graph');
-    else if (k === '3') setView('risk');
+    else if (k === '3') setView('stack');
+    else if (k === '4') setView('risk');
     else if (k === ' ') { e.preventDefault(); togglePlay(); }
     else if (k === 'ArrowLeft') setT(state.t - 1);
     else if (k === 'ArrowRight') setT(state.t + 1);
@@ -734,6 +775,7 @@
     OSP.renderGraph.init(ctx);
     OSP.renderMap.init(ctx);
     OSP.renderRisk.init(ctx);
+    OSP.renderStack.init(ctx);
     OSP.inspector.init(ctx);
     OSP.exporter.init(ctx);
     OSP.editor.init(ctx, { replaceScenario: replaceScenario, toast: toast });

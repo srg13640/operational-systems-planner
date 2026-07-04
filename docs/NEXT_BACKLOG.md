@@ -63,8 +63,9 @@ current demo; the shipped slice is complete and verified (see `VERIFICATION.md`)
 
 ## Explicitly rejected (do not resurrect without new evidence)
 
-- 3D globe / Three.js multi-domain stack — highest wow, lowest decision value (program-brief
-  §7 lesson; the vendored build remains in `_source` if evidence changes).
+- 3D globe — still rejected. (The multi-domain *stack* half of this item was promoted by owner
+  decision 2026-07-04 and shipped in Loop 7 as the STACK view — rebuilt data-driven on a
+  dependency-free canvas perspective renderer, not ported from the Three.js prototype.)
 - Live feeds, COP integration, multi-user, server anything.
 - In-app slide builder / narrated tour / auto-play briefing.
 - Simulation or outcome prediction.

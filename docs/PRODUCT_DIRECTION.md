@@ -149,5 +149,8 @@ label annotation tools with undo, saved named briefing snapshots + batch export,
 MapLibre+PMTiles basemap upgrade, milsymbol-grade symbology options, template pack + AI data
 workflow docs.
 
-**Explicitly not:** 3D globe/Three.js stack, live feeds, multi-user/server anything, access
-control, simulation, in-app slide decks.
+**Explicitly not:** 3D globe, live feeds, multi-user/server anything, access control,
+simulation, in-app slide decks. (Revised 2026-07-04: the multi-domain *stack* view — originally
+deferred with the 3D family — was promoted to a first-class surface by owner decision, rebuilt
+data-driven on a dependency-free canvas renderer rather than ported from the Three.js
+prototype. The 3D globe remains out.)

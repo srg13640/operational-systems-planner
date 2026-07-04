@@ -58,7 +58,10 @@ function check(name, cond, detail) {
 
   // ---- view switching ----
   const before = app1.errors.length;
-  ['graph', 'risk', 'map', 'graph', 'risk', 'graph'].forEach(v => H.clickView(app1, v));
+  check('stack module present with export hook',
+    !!(app1.window.OSP.renderStack && app1.window.OSP.renderStack.exportDraw && app1.window.OSP.renderStack.activeDomains().length >= 5),
+    app1.window.OSP.renderStack ? app1.window.OSP.renderStack.activeDomains().join(',') : 'missing');
+  ['graph', 'stack', 'risk', 'map', 'stack', 'graph', 'risk', 'graph'].forEach(v => H.clickView(app1, v));
   check('view switching A→B→A clean', app1.errors.length === before, app1.errors.slice(before).join(' | ') || 'clean');
   check('graph rendered nodes', app1.document.querySelectorAll('#gNodes g.node').length >= 30,
     String(app1.document.querySelectorAll('#gNodes g.node').length));

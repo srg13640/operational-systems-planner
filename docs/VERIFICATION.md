@@ -1,6 +1,27 @@
 # Verification
 
-Updated: 2026-07-04 (Loop 6).
+Updated: 2026-07-04 (Loop 7).
+
+## Loop 7 gate run — 2026-07-04 (multi-domain STACK view)
+
+- New first-class **STACK** view (`scripts/render-stack.js`): a multi-domain 3D stack drawn
+  with a hand-rolled perspective projection on canvas 2D (painter's algorithm) — zero new
+  dependencies, works over `file://`, deterministic per frame, and exports through the same
+  model-redraw PNG pipeline (banner-stamped). Domain layers are derived from the data; nodes
+  sit on their plane at their geographic position (unplaced nodes tray-row on their plane,
+  never dropped); cross-domain dependencies render as vertical arcs; selection/finding chains
+  highlight across layers; timeline dimming and degraded rings behave exactly as on the map.
+- Gates: smoke suite now **36 checks — all passing** (stack module + export hook present with
+  ≥5 data-derived domains; view-switch cycle extended to include STACK, twice, error-free).
+- Browser pass: orbit drag, wheel zoom, separation sweep (60→150→110), per-domain layer
+  toggle off/on, auto-orbit on/off, search-select on the stack, finding selection lighting the
+  KILO chain across layers, PNG export from the stack — zero console errors throughout.
+- Product note: the stack was deliberately deferred in Loop 1 ("highest wow, lowest decision
+  value" from the 3D prototype family); promoted to first-class by owner decision 2026-07-04
+  and rebuilt data-driven rather than ported — no Three.js, no doctrine rhetoric, same shared
+  selection/timeline contract as every other view.
+
+Previous update: 2026-07-04 (Loop 6).
 
 ## Loop 6 gate run — 2026-07-04 (GitHub, editor, second scenario)
 

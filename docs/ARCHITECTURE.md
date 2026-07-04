@@ -33,6 +33,8 @@ app/
 │   ├── render-graph.js     SVG graph view
 │   ├── render-map.js       canvas map view
 │   ├── render-risk.js      risk board view
+│   ├── render-stack.js     multi-domain 3D stack (hand-rolled perspective, canvas 2D)
+│   ├── editor.js           in-app editing: forms, add/delete, place-on-map, snapshot undo
 │   ├── inspector.js        selection inspector panel
 │   ├── export.js           PNG model-redraw export, banner/title-block stamping
 │   └── app.js              state store, wiring, timeline, keyboard, persistence, boot

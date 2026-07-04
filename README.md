@@ -41,6 +41,11 @@ and runs air-gapped.
 - **GRAPH** — network and hierarchy layouts with deterministic, reproducible positioning
   (0.000px drift across loads — screenshots taken minutes apart match), criticality color
   lens, vulnerability chain overlays, 2-hop isolate.
+- **STACK** — a multi-domain 3D stack (hand-rolled perspective renderer, no WebGL, no
+  libraries): every domain in the scenario becomes a layer, nodes sit on their domain plane at
+  their geographic position, and cross-domain dependencies draw as vertical arcs — select a
+  finding and its chain lights up from seabed to space. Orbit, zoom, layer toggles, a
+  separation slider, and auto-orbit for briefings.
 - **RISK** — BLUF paragraph, ranked criticality with per-component score bars and live weight
   sliders, finding cards split auto-detected vs analyst-asserted, and emergent findings tagged
   with the hour they appeared.

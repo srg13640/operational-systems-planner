@@ -73,6 +73,8 @@
     c2d.translate(0, HEADER_H * SCALE);
     if (st.view === 'graph') {
       OSP.renderGraph.exportDraw(c2d, w, contentH);
+    } else if (st.view === 'stack') {
+      OSP.renderStack.exportDraw(c2d, w, contentH);
     } else {
       OSP.renderMap.exportDraw(c2d, w, contentH);
     }
