@@ -1,0 +1,12 @@
+# Source prototype archives (1.5GB, preserved locally, never in the repo)
+_source/
+_archive/
+
+# Dependencies (dev-only; the app itself has zero runtime dependencies)
+node_modules/
+
+# Session/tool state
+.claude/
+.DS_Store
+*.zip
+CLAUDE_CODE_PROMPT.md

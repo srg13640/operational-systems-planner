@@ -1,0 +1,3392 @@
+{
+  "kind": "osp-scenario",
+  "schema_version": "1.0",
+  "meta": {
+    "id": "osp-demo-baltic-sentinel",
+    "name": "Operation BALTIC SENTINEL",
+    "description": "Notional NATO multinational corps operation on the eastern flank across 96 hours. Demonstrates phase-aware criticality with a logistics twist: the Phase I rail-corridor cut and coastal-LOC degradation converge all corps sustainment onto the single Gdynia port terminal in Phase II.",
+    "scenario_name": "Operation BALTIC SENTINEL",
+    "turn": "H+0 through H+96",
+    "side": "Friendly",
+    "created_by": "OSP demo authoring (synthetic)",
+    "created_at": "2026-07-04T00:00:00Z",
+    "modified_at": "2026-07-04T00:00:00Z",
+    "assumptions": [
+      "All units, systems, locations, links, events, and timings in this scenario are entirely fictional and were generated solely for product demonstration.",
+      "Real basing and geographic names are used only to make the map read plausibly; no real-world force disposition, capability, or plan is represented.",
+      "H-hours are exercise-relative: H+0 is scenario start, not any real-world date or event.",
+      "Scenario themes drawn from unclassified open-source analysis of Baltic and eastern-flank logistics and infrastructure (European rail gauge break, port throughput limits, the Suwalki corridor, undersea cable incidents, GPS jamming reports); all units, systems, and events are fictional."
+    ],
+    "tags": [
+      "demo",
+      "notional",
+      "baltic",
+      "eastern-flank",
+      "corps"
+    ],
+    "classification": {
+      "marking": "UNCLASSIFIED",
+      "banner_caveat": "NOTIONAL - FICTIONAL DATA",
+      "prototype": true
+    }
+  },
+  "timeline": {
+    "duration_hours": 96,
+    "phases": [
+      {
+        "id": "p1",
+        "label": "Set Conditions",
+        "from_hours": 0,
+        "to_hours": 36,
+        "main_effort": "",
+        "notes": "Shaping and prepo draw; sustainment flows uncontested on two ground LOCs and the Gdynia seaport; enclave jamming and subsea incidents probe the flank."
+      },
+      {
+        "id": "p2",
+        "label": "Close Operations",
+        "from_hours": 36,
+        "to_hours": 72,
+        "main_effort": "MN Corps NORTHEAST deep fires — HIMARS counter-fire vs OPFOR SRBM and enclave IADS",
+        "notes": "Corridor cut — everything moves through Gdynia; GPS jamming degrades precision logistics and the coastal LOC."
+      },
+      {
+        "id": "p3",
+        "label": "Consolidate",
+        "from_hours": 72,
+        "to_hours": 96,
+        "main_effort": "",
+        "notes": "Rail bridges and the Baltic trunk under repair; throughput disperses off the single terminal; risk shifts to interceptor stocks and port endurance."
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "corps-main",
+      "name": "MN Corps NORTHEAST Main Command Post",
+      "node_type": "command_post",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST",
+      "parent_id": "",
+      "warfighting_function": "Command and Control",
+      "domain": "c2",
+      "mission": "Provides multinational corps mission command and synchronizes eastern-flank operations across all warfighting functions for Operation BALTIC SENTINEL.",
+      "mission_importance": 5,
+      "echelon_importance": 5,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST",
+      "vulnerability_notes": "Main CP, COP servers, and the SATCOM gateway draw on the same host-nation power grid segment.",
+      "tags": [
+        "c2",
+        "hq",
+        "main-cp"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Szczecin, Poland",
+        "lat": 53.43,
+        "lon": 14.6,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "XXX",
+        "hq": true,
+        "cp": "MAIN"
+      }
+    },
+    {
+      "id": "div-hq",
+      "name": "MN Division NORTH Headquarters",
+      "node_type": "headquarters",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Division",
+      "unit": "MN Division NORTH",
+      "parent_id": "corps-main",
+      "warfighting_function": "Command and Control",
+      "domain": "c2",
+      "mission": "Commands the forward multinational division defending the corridor approaches.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Division NORTH",
+      "vulnerability_notes": "",
+      "tags": [
+        "c2",
+        "hq"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Elblag, Poland",
+        "lat": 54.16,
+        "lon": 19.41,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "infantry",
+        "echelon_mark": "XX",
+        "hq": true,
+        "cp": ""
+      }
+    },
+    {
+      "id": "div-tac",
+      "name": "MN Division NORTH Tactical Command Post",
+      "node_type": "command_post",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Division",
+      "unit": "MN Division NORTH",
+      "parent_id": "div-hq",
+      "warfighting_function": "Command and Control",
+      "domain": "c2",
+      "mission": "Forward mission command node controlling the close fight in the Suwalki corridor during Phase II.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Division NORTH",
+      "vulnerability_notes": "",
+      "tags": [
+        "c2",
+        "hq",
+        "tac-cp"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Suwalki region, Poland",
+        "lat": 54.1,
+        "lon": 22.93,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "XX",
+        "hq": true,
+        "cp": "TAC"
+      }
+    },
+    {
+      "id": "fires-cell",
+      "name": "Corps Fires Cell",
+      "node_type": "directorate",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST",
+      "parent_id": "corps-main",
+      "warfighting_function": "Fires",
+      "domain": "c2",
+      "mission": "Plans and controls corps deep fires and manages the HIMARS counter-fire kill chain.",
+      "mission_importance": 4,
+      "echelon_importance": 5,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST FSE",
+      "vulnerability_notes": "",
+      "tags": [
+        "fires",
+        "targeting"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Szczecin, Poland",
+        "lat": 53.44,
+        "lon": 14.62,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "sust-bde",
+      "name": "87th Corps Sustainment Brigade HQ",
+      "node_type": "headquarters",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Brigade",
+      "unit": "87th Sustainment Brigade",
+      "parent_id": "corps-main",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Directs corps sustainment through the Gdynia seaport, the Powidz aerial port, and the ground LOC network.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "87th Sustainment Brigade",
+      "vulnerability_notes": "",
+      "tags": [
+        "sustainment",
+        "hq"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Gdansk, Poland",
+        "lat": 54.35,
+        "lon": 18.65,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "transportation",
+        "echelon_mark": "X",
+        "hq": true,
+        "cp": ""
+      }
+    },
+    {
+      "id": "himars-bn",
+      "name": "1-77 Field Artillery (HIMARS)",
+      "node_type": "shooter",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Battalion",
+      "unit": "1-77 FA",
+      "parent_id": "fires-cell",
+      "warfighting_function": "Fires",
+      "domain": "strike",
+      "mission": "Delivers long-range precision rocket fires against OPFOR SRBM launchers and enclave air defense radars.",
+      "mission_importance": 5,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST FSE",
+      "vulnerability_notes": "Rocket resupply single-threads through the Gdynia terminal once the rail corridor is cut at H+36.",
+      "tags": [
+        "fires",
+        "himars",
+        "kill-chain"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Orzysz, Poland",
+        "lat": 53.81,
+        "lon": 21.95,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "artillery",
+        "echelon_mark": "II",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "gbad-bn",
+      "name": "2-43 ADA Battalion (GBAD)",
+      "node_type": "unit",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Battalion",
+      "unit": "2-43 ADA",
+      "parent_id": "corps-main",
+      "warfighting_function": "Protection",
+      "domain": "air",
+      "mission": "Provides ground-based air defense of the Gdynia port complex and the corps Main CP.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST",
+      "vulnerability_notes": "Interceptor reloads arrive by sea; magazine depth is measured in days under sustained SRBM salvos.",
+      "tags": [
+        "protection",
+        "gbad"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Gdynia, Poland",
+        "lat": 54.47,
+        "lon": 18.42,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "ada",
+        "echelon_mark": "II",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "ew-co",
+      "name": "Corps EW Company",
+      "node_type": "unit",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Company",
+      "unit": "MN Corps NORTHEAST",
+      "parent_id": "corps-main",
+      "warfighting_function": "Fires",
+      "domain": "ems",
+      "mission": "Conducts electronic attack against enclave jamming and early-warning emitters.",
+      "mission_importance": 3,
+      "echelon_importance": 2,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST G3",
+      "vulnerability_notes": "",
+      "tags": [
+        "effects",
+        "ew"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Elk, Poland",
+        "lat": 53.83,
+        "lon": 22.36,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "I",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "cyber-cell",
+      "name": "Corps Cyber Effects Planning Cell",
+      "node_type": "office",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST",
+      "parent_id": "corps-main",
+      "warfighting_function": "Fires",
+      "domain": "cyber",
+      "mission": "Plans and coordinates offensive cyber effects against enclave IADS command and control.",
+      "mission_importance": 3,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST G3",
+      "vulnerability_notes": "",
+      "tags": [
+        "effects",
+        "cyber"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Szczecin, Poland",
+        "lat": 53.42,
+        "lon": 14.58,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "sof-det",
+      "name": "SOF Reconnaissance Detachment NORTH",
+      "node_type": "unit",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Detachment",
+      "unit": "",
+      "parent_id": "corps-main",
+      "warfighting_function": "Intelligence",
+      "domain": "land",
+      "mission": "Conducts special reconnaissance along the corridor flank, cueing counter-fire against OPFOR SRBM movement.",
+      "mission_importance": 3,
+      "echelon_importance": 2,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "SOF Component (notional)",
+      "vulnerability_notes": "",
+      "tags": [
+        "sof",
+        "recce"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Alytus, Lithuania",
+        "lat": 54.4,
+        "lon": 24.05,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "infantry",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "awacs-orbit",
+      "name": "NATO AEW&C Orbit BALTIC GUARDIAN",
+      "node_type": "platform",
+      "side": "Friendly",
+      "service": "NATO",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Intelligence",
+      "domain": "air",
+      "mission": "Airborne early warning and control orbit over central Poland feeding the recognized air picture to corps air defense.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "NATO AEW&C Force (notional)",
+      "vulnerability_notes": "Enclave long-range SAM coverage pushes the orbit west in Phase II, thinning radar coverage over the corridor.",
+      "tags": [
+        "sensor",
+        "aew"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "AEW&C orbit, central Poland",
+        "lat": 52.5,
+        "lon": 19.5,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "aviation",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "spod-gdynia",
+      "name": "Seaport of Debarkation GDYNIA",
+      "node_type": "facility",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Receives strategic sealift and prepositioned-stock draw at the Gdynia quays for discharge into the port logistics terminal.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "owner": "Theater JLSG (notional)",
+      "vulnerability_notes": "Deep-draft berths and heavy cranes are concentrated on two quays — the port-throughput chokepoint open-source Baltic logistics studies flag.",
+      "tags": [
+        "sustainment",
+        "seaport",
+        "spod"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Port of Gdynia, Poland",
+        "lat": 54.53,
+        "lon": 18.55,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "port-log",
+      "name": "Port Logistics Terminal GDYNIA",
+      "node_type": "logistics_node",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Brigade",
+      "unit": "87th Sustainment Brigade",
+      "parent_id": "sust-bde",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Stages, marshals, and pushes all seaborne sustainment from the Gdynia quays onto the corps distribution network.",
+      "mission_importance": 5,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "owner": "87th Sustainment Brigade SPO",
+      "vulnerability_notes": "Becomes the sole feed for division sustainment, ammunition, and interceptor reloads once the rail corridor is cut (H+36) and the coastal LOC degrades under GPS jamming — a Phase II single point of failure that does not exist in Phase I.",
+      "tags": [
+        "sustainment",
+        "terminal",
+        "defended-asset-candidate"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Gdynia port complex, Poland",
+        "lat": 54.54,
+        "lon": 18.53,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "apod-powidz",
+      "name": "Airfield Logistics Node POWIDZ (APOD)",
+      "node_type": "logistics_node",
+      "side": "Friendly",
+      "service": "Air Force",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Operates the aerial port of debarkation receiving the Ramstein airlift shuttle for time-sensitive corps cargo.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {
+        "p2": "Degraded"
+      },
+      "classification": "CUI",
+      "owner": "Theater JLSG (notional)",
+      "vulnerability_notes": "Single large ramp and fuel farm — the airfield-concentration problem that makes APODs the first SRBM aimpoints.",
+      "tags": [
+        "sustainment",
+        "apod",
+        "airfield"
+      ],
+      "notes": "Ramp and fuel hydrants damaged by the Phase II SRBM salvo; partial throughput until repairs complete.",
+      "geo": {
+        "location_name": "Powidz Air Base, Poland",
+        "lat": 52.38,
+        "lon": 17.85,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "rail-yard",
+      "name": "Rail Gauge-Break Yard MOCKAVA",
+      "node_type": "logistics_node",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Transloads corps sustainment between European standard-gauge and broad-gauge rolling stock at the Mockava/Sestokai break-of-gauge yard.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {
+        "p2": "Offline",
+        "p3": "Degraded"
+      },
+      "classification": "CUI",
+      "owner": "Host-nation rail authority (notional)",
+      "vulnerability_notes": "Fixed cranes and limited transload sidings cap corridor rail throughput — the gauge-break bottleneck every open-source Baltic mobility study flags.",
+      "tags": [
+        "sustainment",
+        "rail",
+        "gauge-break"
+      ],
+      "notes": "Approach bridges struck at H+36; yard offline through Phase II, partial capability restored by engineer repair in Phase III.",
+      "geo": {
+        "location_name": "Mockava/Sestokai, Lithuania",
+        "lat": 54.4,
+        "lon": 23.5,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "coastal-corridor",
+      "name": "Coastal Road-Rail Corridor SIAULIAI",
+      "node_type": "facility",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Coastal road and rail line of communication carrying convoy and rail traffic from the Polish ports north toward the division rear.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {
+        "p2": "Degraded",
+        "p3": "Degraded"
+      },
+      "classification": "CUI",
+      "owner": "Host-nation movement control (notional)",
+      "vulnerability_notes": "Convoy navigation and movement-tracking on the corridor depend on GPS; persistent enclave jamming plus interdiction strikes cut effective throughput in half after H+36.",
+      "tags": [
+        "sustainment",
+        "loc",
+        "corridor"
+      ],
+      "notes": "Degraded from H+36 by GPS jamming and precision strikes on chokepoints; residual throughput only in Phases II-III.",
+      "geo": {
+        "location_name": "Vicinity Siauliai, Lithuania",
+        "lat": 55.93,
+        "lon": 23.31,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "prepo-site",
+      "name": "Prepositioned Stocks Site ODER",
+      "node_type": "logistics_node",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Issues prepositioned combat and sustainment stocks for onward movement to the corps.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "owner": "Theater AFSB (notional)",
+      "vulnerability_notes": "Draw rate is gated by the LOCs east: rail through Mockava in Phase I, coastal sealift into Gdynia after the corridor is cut.",
+      "tags": [
+        "sustainment",
+        "prepositioning"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Germany-Poland border, vicinity Frankfurt (Oder)",
+        "lat": 52.34,
+        "lon": 14.55,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "atp-suwalki",
+      "name": "Ammunition Transfer Point SUWALKI",
+      "node_type": "logistics_node",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Company",
+      "unit": "87th Sustainment Brigade",
+      "parent_id": "sust-bde",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Forward ammunition transfer point issuing Class V to corps fires units in the corridor.",
+      "mission_importance": 3,
+      "echelon_importance": 2,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "owner": "87th Sustainment Brigade",
+      "vulnerability_notes": "",
+      "tags": [
+        "sustainment",
+        "class-v"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Suwalki, Poland",
+        "lat": 54.08,
+        "lon": 22.95,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "dsb",
+      "name": "MN Division NORTH Sustainment Battalion",
+      "node_type": "unit",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Battalion",
+      "unit": "MN Division NORTH",
+      "parent_id": "div-hq",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Distributes all commodity classes from the corps LOCs to division units in the corridor.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Division NORTH",
+      "vulnerability_notes": "Fed by two ground LOCs plus the port in Phase I; single-threaded through the Gdynia terminal after H+36.",
+      "tags": [
+        "sustainment",
+        "distribution"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Augustow, Poland",
+        "lat": 53.84,
+        "lon": 22.98,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "transportation",
+        "echelon_mark": "II",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "eng-bn",
+      "name": "52nd Engineer Battalion (Rail Repair)",
+      "node_type": "unit",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Battalion",
+      "unit": "52nd Engineer Bn",
+      "parent_id": "sust-bde",
+      "warfighting_function": "Movement and Maneuver",
+      "domain": "land",
+      "mission": "Restores rail bridges and the gauge-break yard during consolidation.",
+      "mission_importance": 3,
+      "echelon_importance": 2,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST G4",
+      "vulnerability_notes": "",
+      "tags": [
+        "engineer",
+        "rail-repair"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Elk, Poland",
+        "lat": 53.8,
+        "lon": 22.4,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "engineer",
+        "echelon_mark": "II",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "satcom-gw",
+      "name": "Corps SATCOM Gateway BALTIC",
+      "node_type": "system",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST G6",
+      "parent_id": "corps-main",
+      "warfighting_function": "Command and Control",
+      "domain": "c2",
+      "mission": "Aggregates corps wideband SATCOM reach-back for mission command, fires, intelligence, and sustainment traffic.",
+      "mission_importance": 5,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST G6",
+      "vulnerability_notes": "Mission command, fires, and sustainment data all concentrate on this single gateway path; enclave uplink jamming squeezes it from Phase I.",
+      "tags": [
+        "satcom",
+        "transport",
+        "backbone"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Gateway site, vicinity Szczecin",
+        "lat": 53.4,
+        "lon": 14.65,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "sat-natosat-a",
+      "name": "NATO SATCOM IV-A (Wideband)",
+      "node_type": "satellite",
+      "side": "Friendly",
+      "service": "NATO",
+      "echelon": "Strategic",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Command and Control",
+      "domain": "space",
+      "mission": "Provides primary wideband SATCOM transport between the corps gateway and the Nordic ground station.",
+      "mission_importance": 4,
+      "echelon_importance": 5,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "NATO CIS Agency (notional)",
+      "vulnerability_notes": "",
+      "tags": [
+        "space",
+        "wideband"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Geostationary belt (non-geographic)",
+        "lat": null,
+        "lon": null,
+        "non_geographic": true
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "sat-comka-b",
+      "name": "Commercial Ka-band GEO BALTICSAT-2",
+      "node_type": "satellite",
+      "side": "Friendly",
+      "service": "Commercial",
+      "echelon": "Strategic",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Command and Control",
+      "domain": "space",
+      "mission": "Leased commercial Ka-band transponder providing alternate wideband transport for corps reach-back.",
+      "mission_importance": 3,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "Commercial operator (leased, notional)",
+      "vulnerability_notes": "",
+      "tags": [
+        "space",
+        "wideband",
+        "commercial"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Geostationary belt (non-geographic)",
+        "lat": null,
+        "lon": null,
+        "non_geographic": true
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "gs-nordic",
+      "name": "Ground Station NORDIC",
+      "node_type": "ground_station",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Command and Control",
+      "domain": "space",
+      "mission": "Regional wideband teleport in southern Norway that terminates corps SATCOM reach-back into the theater network.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "Theater CIS Group (notional)",
+      "vulnerability_notes": "All corps wideband reach-back lands at this single teleport — a standing comms concentration in every phase.",
+      "tags": [
+        "teleport",
+        "backbone"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Eggemoen, Norway",
+        "lat": 60.2,
+        "lon": 10.4,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "cable-landing",
+      "name": "Undersea Cable Landing KOLOBRZEG",
+      "node_type": "facility",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Command and Control",
+      "domain": "c2",
+      "mission": "Baltic undersea fiber trunk landing carrying bulk corps data traffic to the theater network.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {
+        "p2": "Degraded",
+        "p3": "Degraded"
+      },
+      "classification": "SECRET",
+      "owner": "Theater J6 (leased commercial trunk)",
+      "vulnerability_notes": "Baltic subsea infrastructure incidents 2023-2025 are the open-source theme: a single trunk with no diverse path and hostile subsurface activity around it.",
+      "tags": [
+        "fiber",
+        "backbone",
+        "subsea"
+      ],
+      "notes": "Trunk damaged by subsurface action at H+40; cable-ship repair begins in Phase III.",
+      "geo": {
+        "location_name": "Kolobrzeg, Poland",
+        "lat": 54.18,
+        "lon": 15.58,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "theater-net",
+      "name": "Theater Network Node RAMSTEIN",
+      "node_type": "network",
+      "side": "Friendly",
+      "service": "Joint",
+      "echelon": "Theater",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Command and Control",
+      "domain": "c2",
+      "mission": "Theater network point of presence connecting corps reach-back into strategic transport.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "Theater CIS Group (notional)",
+      "vulnerability_notes": "",
+      "tags": [
+        "network",
+        "backbone"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Ramstein Air Base, Germany",
+        "lat": 49.44,
+        "lon": 7.6,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "mcp-sys",
+      "name": "Mission Command Platform (Corps COP)",
+      "node_type": "application",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST",
+      "parent_id": "corps-main",
+      "warfighting_function": "Command and Control",
+      "domain": "data",
+      "mission": "Hosts the corps common operational picture and mission command services for all command posts.",
+      "mission_importance": 5,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST G3/G6",
+      "vulnerability_notes": "",
+      "tags": [
+        "system",
+        "cop",
+        "mission-command"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Szczecin, Poland",
+        "lat": 53.45,
+        "lon": 14.63,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "log-data-sys",
+      "name": "Logistics Data System",
+      "node_type": "system",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Brigade",
+      "unit": "87th Sustainment Brigade",
+      "parent_id": "sust-bde",
+      "warfighting_function": "Sustainment",
+      "domain": "data",
+      "mission": "Aggregates supply, movement, and port-throughput data feeding the sustainment and corps common operating pictures.",
+      "mission_importance": 3,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "owner": "87th Sustainment Brigade SPO",
+      "vulnerability_notes": "Precision-logistics scheduling assumes GPS-disciplined timing and tracking; enclave jamming forces fallback to manual batch reporting.",
+      "tags": [
+        "system",
+        "logistics"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Gdynia, Poland",
+        "lat": 54.5,
+        "lon": 18.54,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "sust-c2-sys",
+      "name": "Sustainment C2 System",
+      "node_type": "system",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Brigade",
+      "unit": "87th Sustainment Brigade",
+      "parent_id": "sust-bde",
+      "warfighting_function": "Sustainment",
+      "domain": "sustain",
+      "mission": "Logistics common operating picture tracking stocks, movements, and commodity status for the corps.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "owner": "87th Sustainment Brigade SPO",
+      "vulnerability_notes": "",
+      "tags": [
+        "sustainment",
+        "c2-system"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Gdansk, Poland",
+        "lat": 54.36,
+        "lon": 18.66,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "intel-db",
+      "name": "Corps Intelligence Database",
+      "node_type": "database",
+      "side": "Friendly",
+      "service": "Multinational",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST G2",
+      "parent_id": "corps-main",
+      "warfighting_function": "Intelligence",
+      "domain": "data",
+      "mission": "Stores fused all-source intelligence and target materials serving fires, the COP, and the division.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST G2",
+      "vulnerability_notes": "",
+      "tags": [
+        "system",
+        "intelligence"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Szczecin, Poland",
+        "lat": 53.41,
+        "lon": 14.61,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "fires-data-sys",
+      "name": "Fires Data System",
+      "node_type": "system",
+      "side": "Friendly",
+      "service": "Army",
+      "echelon": "Corps",
+      "unit": "MN Corps NORTHEAST FSE",
+      "parent_id": "fires-cell",
+      "warfighting_function": "Fires",
+      "domain": "data",
+      "mission": "Processes fire missions and technical fire direction for the HIMARS battalion.",
+      "mission_importance": 5,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "MN Corps NORTHEAST FSE",
+      "vulnerability_notes": "Depends on GPS-derived timing; enclave jamming slows Phase II counter-fire processing.",
+      "tags": [
+        "system",
+        "fires",
+        "kill-chain"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Vicinity Szczecin, Poland",
+        "lat": 53.46,
+        "lon": 14.64,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "opfor-iads",
+      "name": "OPFOR Enclave IADS Complex",
+      "node_type": "system",
+      "side": "Enemy",
+      "service": "OPFOR",
+      "echelon": "Operational",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Protection",
+      "domain": "air",
+      "mission": "Layered surface-to-air missile and early-warning radar complex covering the enclave and the southern Baltic.",
+      "mission_importance": 4,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "OPFOR",
+      "vulnerability_notes": "",
+      "tags": [
+        "opfor",
+        "iads"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Notional OPFOR enclave air defense complex",
+        "lat": 54.7,
+        "lon": 20.5,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "ada",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "opfor-srbm",
+      "name": "OPFOR SRBM Brigade",
+      "node_type": "shooter",
+      "side": "Enemy",
+      "service": "OPFOR",
+      "echelon": "Brigade",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Fires",
+      "domain": "strike",
+      "mission": "Delivers short-range ballistic missile salvos against airfields, ports, and corridor chokepoints.",
+      "mission_importance": 5,
+      "echelon_importance": 4,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "OPFOR",
+      "vulnerability_notes": "",
+      "tags": [
+        "opfor",
+        "srbm",
+        "missile-salvo"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Notional OPFOR enclave missile garrison",
+        "lat": 54.65,
+        "lon": 20.8,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "artillery",
+        "echelon_mark": "X",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "opfor-sag",
+      "name": "OPFOR Baltic Surface Action Group",
+      "node_type": "platform",
+      "side": "Enemy",
+      "service": "OPFOR",
+      "echelon": "Squadron",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Movement and Maneuver",
+      "domain": "maritime",
+      "mission": "Surface action group threatening sea approaches to the Polish ports and loitering near subsea infrastructure.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "OPFOR",
+      "vulnerability_notes": "",
+      "tags": [
+        "opfor",
+        "sag",
+        "maritime"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Southern Baltic, notional SAG station",
+        "lat": 55.6,
+        "lon": 19,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "",
+        "hq": false,
+        "cp": ""
+      }
+    },
+    {
+      "id": "opfor-ew",
+      "name": "OPFOR EW/Jamming Regiment",
+      "node_type": "unit",
+      "side": "Enemy",
+      "service": "OPFOR",
+      "echelon": "Regiment",
+      "unit": "",
+      "parent_id": "",
+      "warfighting_function": "Fires",
+      "domain": "ems",
+      "mission": "Conducts GPS and SATCOM uplink jamming from the enclave across the corridor and southern Baltic.",
+      "mission_importance": 4,
+      "echelon_importance": 3,
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "owner": "OPFOR",
+      "vulnerability_notes": "",
+      "tags": [
+        "opfor",
+        "ew",
+        "jamming"
+      ],
+      "notes": "",
+      "geo": {
+        "location_name": "Notional OPFOR enclave EW garrison",
+        "lat": 54.75,
+        "lon": 20.3,
+        "non_geographic": false
+      },
+      "symbol": {
+        "branch_type": "none",
+        "echelon_mark": "III",
+        "hq": false,
+        "cp": ""
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "l-cmd-div",
+      "source": "corps-main",
+      "target": "div-hq",
+      "relationship_type": "commands",
+      "direction": "directed",
+      "communication_method": "WAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Corps command relationship with the forward multinational division."
+    },
+    {
+      "id": "l-cmd-tac",
+      "source": "div-hq",
+      "target": "div-tac",
+      "relationship_type": "commands",
+      "direction": "directed",
+      "communication_method": "WAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Division TAC assumes control of the corridor close fight in Phase II."
+    },
+    {
+      "id": "l-cmd-sust",
+      "source": "corps-main",
+      "target": "sust-bde",
+      "relationship_type": "commands",
+      "direction": "directed",
+      "communication_method": "WAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-fires-himars",
+      "source": "fires-cell",
+      "target": "himars-bn",
+      "relationship_type": "controls",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-div-dsb",
+      "source": "div-hq",
+      "target": "dsb",
+      "relationship_type": "controls",
+      "direction": "directed",
+      "communication_method": "UHF/VHF/HF Radio",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 secure voice",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-corps-gbad",
+      "source": "corps-main",
+      "target": "gbad-bn",
+      "relationship_type": "controls",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-corps-ew",
+      "source": "corps-main",
+      "target": "ew-co",
+      "relationship_type": "controls",
+      "direction": "directed",
+      "communication_method": "UHF/VHF/HF Radio",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 secure voice",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-corps-sof",
+      "source": "corps-main",
+      "target": "sof-det",
+      "relationship_type": "commands",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "SOF detachment reach-back rides narrowband SATCOM, independent of the corps gateway."
+    },
+    {
+      "id": "l-sust-eng",
+      "source": "sust-bde",
+      "target": "eng-bn",
+      "relationship_type": "controls",
+      "direction": "directed",
+      "communication_method": "UHF/VHF/HF Radio",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 secure voice",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-main-hosts-mcp",
+      "source": "corps-main",
+      "target": "mcp-sys",
+      "relationship_type": "hosts",
+      "direction": "directed",
+      "communication_method": "LAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "COP server stack is hosted in the Main CP on shared host-nation power."
+    },
+    {
+      "id": "l-mcp-gw",
+      "source": "mcp-sys",
+      "target": "satcom-gw",
+      "relationship_type": "depends_on",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "8 Mbps",
+      "latency": "600 ms",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Primary reach-back transport for the corps common operational picture in all phases."
+    },
+    {
+      "id": "l-intel-mcp",
+      "source": "intel-db",
+      "target": "mcp-sys",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Database Replication",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-log-mcp",
+      "source": "log-data-sys",
+      "target": "mcp-sys",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "API",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "TLS 1.3",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "CUI logistics status feed crosses a classification boundary into the SECRET COP through a one-way guard."
+    },
+    {
+      "id": "l-fires-uses-fd",
+      "source": "fires-cell",
+      "target": "fires-data-sys",
+      "relationship_type": "uses",
+      "direction": "directed",
+      "communication_method": "LAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-fd-himars",
+      "source": "fires-data-sys",
+      "target": "himars-bn",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 5,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Fire mission and technical fire direction data to the HIMARS battalion."
+    },
+    {
+      "id": "l-intel-fd",
+      "source": "intel-db",
+      "target": "fires-data-sys",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "API",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Target intelligence and battle damage assessment feed the counter-fire chain."
+    },
+    {
+      "id": "l-sof-intel",
+      "source": "sof-det",
+      "target": "intel-db",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "256 kbps",
+      "latency": "700 ms",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Special reconnaissance reporting on OPFOR SRBM movement along the corridor flank."
+    },
+    {
+      "id": "l-awacs-intel",
+      "source": "awacs-orbit",
+      "target": "intel-db",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Recognized air picture and track data from the AEW&C orbit."
+    },
+    {
+      "id": "l-awacs-gbad",
+      "source": "awacs-orbit",
+      "target": "gbad-bn",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Early-warning cueing for port and CP air defense — orbit displacement in Phase II lengthens warning time."
+    },
+    {
+      "id": "l-hf-fallback",
+      "source": "div-tac",
+      "target": "himars-bn",
+      "relationship_type": "communicates_with",
+      "direction": "bidirectional",
+      "communication_method": "UHF/VHF/HF Radio",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 2,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Legacy HF fallback net awaiting multinational crypto fill — currently passes SECRET traffic unencrypted."
+    },
+    {
+      "id": "l-gw-sata",
+      "source": "satcom-gw",
+      "target": "sat-natosat-a",
+      "relationship_type": "uplinks_to",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "50 Mbps",
+      "latency": "600 ms",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Primary wideband uplink."
+    },
+    {
+      "id": "l-gw-satb",
+      "source": "satcom-gw",
+      "target": "sat-comka-b",
+      "relationship_type": "uplinks_to",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "25 Mbps",
+      "latency": "620 ms",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Leased commercial Ka-band alternate uplink."
+    },
+    {
+      "id": "l-gs-sata",
+      "source": "gs-nordic",
+      "target": "sat-natosat-a",
+      "relationship_type": "downlinks_from",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "50 Mbps",
+      "latency": "600 ms",
+      "resilience": 2,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-gs-satb",
+      "source": "gs-nordic",
+      "target": "sat-comka-b",
+      "relationship_type": "downlinks_from",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "25 Mbps",
+      "latency": "620 ms",
+      "resilience": 2,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-gw-gs",
+      "source": "satcom-gw",
+      "target": "gs-nordic",
+      "relationship_type": "relays_through",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "50 Mbps",
+      "latency": "600 ms",
+      "resilience": 2,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 5,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "All corps wideband traffic lands at the NORDIC teleport — a standing comms concentration in every phase."
+    },
+    {
+      "id": "l-gs-theater",
+      "source": "gs-nordic",
+      "target": "theater-net",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Fiber",
+      "bandwidth": "10 Gbps",
+      "latency": "15 ms",
+      "resilience": 2,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Teleport-to-theater terrestrial segment — no diverse terrestrial route north of Oslo."
+    },
+    {
+      "id": "l-mcp-cable",
+      "source": "mcp-sys",
+      "target": "cable-landing",
+      "relationship_type": "relays_through",
+      "direction": "directed",
+      "communication_method": "Fiber",
+      "bandwidth": "1 Gbps",
+      "latency": "20 ms",
+      "resilience": 2,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Bulk COP and intelligence replication rides the Baltic trunk; degraded after the H+40 subsea incident."
+    },
+    {
+      "id": "l-cable-theater",
+      "source": "cable-landing",
+      "target": "theater-net",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Fiber",
+      "bandwidth": "10 Gbps",
+      "latency": "18 ms",
+      "resilience": 1,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Single Baltic undersea trunk with no diverse path — the 2023-2025 subsea-incident theme; damaged at H+40."
+    },
+    {
+      "id": "l-sustc2-gw",
+      "source": "sust-c2-sys",
+      "target": "satcom-gw",
+      "relationship_type": "depends_on",
+      "direction": "directed",
+      "communication_method": "SATCOM",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Sustainment C2 reach-back rides the corps gateway — logistics data joins the comms concentration."
+    },
+    {
+      "id": "l-sust-uses-c2",
+      "source": "sust-bde",
+      "target": "sust-c2-sys",
+      "relationship_type": "uses",
+      "direction": "directed",
+      "communication_method": "LAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 4,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-log-sustc2",
+      "source": "log-data-sys",
+      "target": "sust-c2-sys",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "API",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "TLS 1.3",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-portlog-log",
+      "source": "port-log",
+      "target": "log-data-sys",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "WAN",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "TLS 1.3",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Port throughput and vessel discharge status feed."
+    },
+    {
+      "id": "l-yard-courier",
+      "source": "rail-yard",
+      "target": "sust-c2-sys",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
+      "communication_method": "Courier",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Gauge-break transload status hand-carried daily to the sustainment COP — manual reporting gate with roughly 12-hour latency."
+    },
+    {
+      "id": "l-rail-prepo-yard",
+      "source": "prepo-site",
+      "target": "rail-yard",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [
+        "rail-loc"
+      ],
+      "notes": "Prepo draw moves east by standard-gauge rail to the Mockava transload; corridor bridges are struck and the line cut at H+36."
+    },
+    {
+      "id": "l-rail-yard-dsb",
+      "source": "rail-yard",
+      "target": "dsb",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [
+        "rail-loc"
+      ],
+      "notes": "Broad-gauge onward movement to the division rear; lost when the corridor is interdicted at H+36."
+    },
+    {
+      "id": "l-rail-yard-atp",
+      "source": "rail-yard",
+      "target": "atp-suwalki",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [
+        "rail-loc"
+      ],
+      "notes": "Class V by rail to the Suwalki ATP; lost when the corridor is interdicted at H+36."
+    },
+    {
+      "id": "l-port-coastal",
+      "source": "port-log",
+      "target": "coastal-corridor",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Onward movement north over the coastal road-rail LOC; residual throughput only after H+36 GPS jamming and strikes."
+    },
+    {
+      "id": "l-coastal-dsb",
+      "source": "coastal-corridor",
+      "target": "dsb",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Coastal LOC convoy and rail deliveries into the division rear — GPS-dependent movement tracking."
+    },
+    {
+      "id": "l-spod-portlog",
+      "source": "spod-gdynia",
+      "target": "port-log",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 5,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Everything discharged at the Gdynia quays crosses the single logistics terminal."
+    },
+    {
+      "id": "l-prepo-spod-p2",
+      "source": "prepo-site",
+      "target": "spod-gdynia",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Rail corridor cut — prepo draw diverted to coastal sealift into Gdynia."
+    },
+    {
+      "id": "l-port-dsb-p2",
+      "source": "port-log",
+      "target": "dsb",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 5,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Corridor cut at H+36 — division sustainment single-threaded through the Gdynia terminal."
+    },
+    {
+      "id": "l-port-atp-p2",
+      "source": "port-log",
+      "target": "atp-suwalki",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Ammunition throughput rerouted from the rail corridor through Gdynia after H+36."
+    },
+    {
+      "id": "l-port-gbad-p2",
+      "source": "port-log",
+      "target": "gbad-bn",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Interceptor reloads arrive by sea and issue through the terminal — magazine depth rides on Gdynia."
+    },
+    {
+      "id": "l-port-divtac-p2",
+      "source": "port-log",
+      "target": "div-tac",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 2,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Forward staging packages for the division TAC move through the terminal once the corridor is cut."
+    },
+    {
+      "id": "l-atp-himars",
+      "source": "atp-suwalki",
+      "target": "himars-bn",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 4,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Class V rocket pods to the HIMARS battalion."
+    },
+    {
+      "id": "l-dsb-divtac",
+      "source": "dsb",
+      "target": "div-tac",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Division distribution to the TAC and corridor units."
+    },
+    {
+      "id": "l-apod-divhq",
+      "source": "apod-powidz",
+      "target": "div-hq",
+      "relationship_type": "supplies",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Time-sensitive Class VIII/IX by the Ramstein-Powidz airlift shuttle; ramp damage halves throughput in Phase II."
+    },
+    {
+      "id": "l-gbad-port",
+      "source": "gbad-bn",
+      "target": "port-log",
+      "relationship_type": "protects",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "GBAD coverage of the Gdynia complex — corps defended asset list serial 1 from H+36."
+    },
+    {
+      "id": "l-gbad-apod",
+      "source": "gbad-bn",
+      "target": "apod-powidz",
+      "relationship_type": "protects",
+      "direction": "directed",
+      "communication_method": "Tactical Data Link",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "Type 1 (HAIPE)",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "A single battalion stretches to cover both the port complex and the Powidz ramp."
+    },
+    {
+      "id": "l-himars-iads",
+      "source": "himars-bn",
+      "target": "opfor-iads",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Suppression of enclave air defense radars to open corridors for AEW&C and airlift."
+    },
+    {
+      "id": "l-himars-srbm",
+      "source": "himars-bn",
+      "target": "opfor-srbm",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Counter-fire tasking: hold the SRBM brigade at risk to thin follow-on salvos."
+    },
+    {
+      "id": "l-ew-opforew",
+      "source": "ew-co",
+      "target": "opfor-ew",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1",
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Counter-jamming electronic attack against enclave GPS and uplink jammers."
+    },
+    {
+      "id": "l-cyber-iads",
+      "source": "cyber-cell",
+      "target": "opfor-iads",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1",
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Offensive cyber effects against enclave IADS command and control, authorized H+8 to H+60."
+    },
+    {
+      "id": "l-sof-srbm",
+      "source": "sof-det",
+      "target": "opfor-srbm",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1",
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Special reconnaissance maintains track custody of SRBM launcher movement."
+    },
+    {
+      "id": "l-srbm-apod",
+      "source": "opfor-srbm",
+      "target": "apod-powidz",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "SRBM salvo craters the Powidz ramp at H+38 — the airfield-concentration aimpoint."
+    },
+    {
+      "id": "l-srbm-port",
+      "source": "opfor-srbm",
+      "target": "port-log",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "The terminal everything now moves through sits on the SRBM target deck — the Phase II convergence OPFOR is built to exploit."
+    },
+    {
+      "id": "l-srbm-yard",
+      "source": "opfor-srbm",
+      "target": "rail-yard",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 5,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Interdiction strikes on the corridor approach bridges cut the gauge-break line at H+36."
+    },
+    {
+      "id": "l-opforew-gw",
+      "source": "opfor-ew",
+      "target": "satcom-gw",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1",
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Uplink jamming from the enclave squeezes the corps wideband path."
+    },
+    {
+      "id": "l-opforew-coastal",
+      "source": "opfor-ew",
+      "target": "coastal-corridor",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2",
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Persistent GPS jamming over the corridor degrades convoy navigation and precision-logistics tracking."
+    },
+    {
+      "id": "l-sag-spod",
+      "source": "opfor-sag",
+      "target": "spod-gdynia",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "The SAG threatens the sea approaches to Gdynia, forcing escorted convoys and slowing discharge."
+    },
+    {
+      "id": "l-sag-cable",
+      "source": "opfor-sag",
+      "target": "cable-landing",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p1",
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Subsurface activity loiters near the Baltic trunk — the cable-incident pattern of 2023-2025."
+    },
+    {
+      "id": "l-iads-awacs",
+      "source": "opfor-iads",
+      "target": "awacs-orbit",
+      "relationship_type": "targets",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p2"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Long-range SAM coverage from the enclave pushes the AEW&C orbit west of the Vistula."
+    },
+    {
+      "id": "l-iads-protects-srbm",
+      "source": "opfor-iads",
+      "target": "opfor-srbm",
+      "relationship_type": "protects",
+      "direction": "directed",
+      "communication_method": "UHF/VHF/HF Radio",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "OPFOR proprietary",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": "Enclave IADS umbrella covers the SRBM garrisons."
+    },
+    {
+      "id": "l-iads-protects-ew",
+      "source": "opfor-iads",
+      "target": "opfor-ew",
+      "relationship_type": "protects",
+      "direction": "directed",
+      "communication_method": "UHF/VHF/HF Radio",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "OPFOR proprietary",
+      "dependency_strength": 3,
+      "failure_impact": 3,
+      "provenance": "synthetic",
+      "phase_ids": "all",
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "SECRET",
+      "tags": [],
+      "notes": ""
+    },
+    {
+      "id": "l-eng-yard-p3",
+      "source": "eng-bn",
+      "target": "rail-yard",
+      "relationship_type": "supports",
+      "direction": "directed",
+      "communication_method": "Other",
+      "bandwidth": "",
+      "latency": "",
+      "resilience": 3,
+      "encryption": "",
+      "dependency_strength": 3,
+      "failure_impact": 4,
+      "provenance": "synthetic",
+      "phase_ids": [
+        "p3"
+      ],
+      "status": "Active",
+      "status_by_phase": {},
+      "classification": "CUI",
+      "tags": [],
+      "notes": "Bridge repair and yard restoration during consolidation returns the rail LOC to partial service."
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "id": "v-gauge-break",
+      "title": "Rail gauge-break transload capacity at Mockava",
+      "vulnerability_type": "capacity_limit",
+      "affected_node_ids": [
+        "rail-yard",
+        "dsb",
+        "atp-suwalki"
+      ],
+      "affected_link_ids": [
+        "l-rail-yard-dsb",
+        "l-rail-yard-atp"
+      ],
+      "severity": 4,
+      "likelihood": 4,
+      "detectability": 2,
+      "operational_impact": "Every railcar moving east changes gauge at one yard with fixed cranes and limited sidings. The transload rate caps corridor rail throughput well below demand, and a single interdiction of the approach bridges — as happens at H+36 — removes the entire rail LOC rather than degrading it.",
+      "mitigation": "Pre-stage bridging and transload equipment with the engineer battalion, rehearse yard bypass using road transload sites, and contract additional gauge-changeover bogies before Phase II.",
+      "status": "open",
+      "notes": "Analyst-asserted from open-source Baltic mobility studies; capacity is invisible to link topology."
+    },
+    {
+      "id": "v-port-concentration",
+      "title": "Berth and crane concentration at the Gdynia terminal",
+      "vulnerability_type": "shared_dependency",
+      "affected_node_ids": [
+        "spod-gdynia",
+        "port-log"
+      ],
+      "affected_link_ids": [
+        "l-spod-portlog",
+        "l-port-dsb-p2",
+        "l-port-atp-p2",
+        "l-port-gbad-p2"
+      ],
+      "severity": 5,
+      "likelihood": 3,
+      "detectability": 3,
+      "operational_impact": "Deep-draft berths and heavy cranes concentrate on two quays feeding one logistics terminal. After H+36 that terminal carries division sustainment, ammunition, and interceptor reloads simultaneously; a single successful SRBM strike or mining of the approaches halts every commodity class at once.",
+      "mitigation": "Nominate the terminal to the defended asset list, disperse discharge across Gdansk and Swinoujscie lighterage sites, and pre-position port repair and salvage assets before Phase II.",
+      "status": "open",
+      "notes": "Analyst-asserted; complements the topology-derived Phase II single-point finding on the terminal."
+    },
+    {
+      "id": "v-gps-logistics",
+      "title": "GPS dependence of precision logistics",
+      "vulnerability_type": "single_point_of_failure",
+      "affected_node_ids": [
+        "log-data-sys",
+        "sust-c2-sys",
+        "coastal-corridor",
+        "dsb"
+      ],
+      "affected_link_ids": [
+        "l-coastal-dsb",
+        "l-portlog-log"
+      ],
+      "severity": 4,
+      "likelihood": 4,
+      "detectability": 3,
+      "operational_impact": "Convoy navigation, movement tracking, and delivery scheduling all assume GPS-disciplined position and timing. Enclave jamming reported across the corridor from H+18 forces fallback to paper strip maps and batch reporting, roughly halving effective coastal-LOC throughput exactly when it becomes the only ground route.",
+      "mitigation": "Issue inertial and map-based navigation fallbacks to convoy leads, rehearse jamming-degraded convoy battle drills, and shift the logistics data systems to holdover clocks with courier reconciliation.",
+      "status": "open",
+      "notes": "Analyst-asserted from open-source Baltic GPS-interference reporting."
+    },
+    {
+      "id": "v-interceptor-magazine",
+      "title": "GBAD interceptor magazine depth",
+      "vulnerability_type": "capacity_limit",
+      "affected_node_ids": [
+        "gbad-bn"
+      ],
+      "affected_link_ids": [
+        "l-gbad-port",
+        "l-port-gbad-p2"
+      ],
+      "severity": 4,
+      "likelihood": 4,
+      "detectability": 2,
+      "operational_impact": "Sustained SRBM salvo exchanges deplete GBAD interceptor stocks in days. Reloads arrive by sea through the same Gdynia terminal the battalion defends — a circular dependency: losing the port empties the magazine, and an empty magazine loses the port.",
+      "mitigation": "Enforce defended-asset-list engagement discipline, pre-stage reloads forward of the port before Phase II, and rehearse shoot-look-shoot procedures to stretch the magazine.",
+      "status": "open",
+      "notes": "Analyst-asserted; magazine depth is invisible to link topology."
+    }
+  ],
+  "activities": [
+    {
+      "id": "act-prepo-draw",
+      "name": "Prepo draw and forward staging",
+      "echelon": "Theater",
+      "contact": "direct",
+      "from_hours": 2,
+      "to_hours": 30,
+      "geographic": true,
+      "position": {
+        "lat": 52.34,
+        "lon": 14.55
+      },
+      "source_node_id": "prepo-site",
+      "target_node_id": "rail-yard",
+      "note": "Prepositioned stocks issue at the Oder site and move east by rail through the Mockava gauge break while the corridor is still open."
+    },
+    {
+      "id": "act-counter-sof",
+      "name": "Counter-SOF sweep — corps rear area",
+      "echelon": "Brigade",
+      "contact": "direct",
+      "from_hours": 10,
+      "to_hours": 26,
+      "geographic": true,
+      "position": {
+        "lat": 53.9,
+        "lon": 20.5
+      },
+      "source_node_id": "sust-bde",
+      "target_node_id": "",
+      "note": "Rear-area sweep against OPFOR sabotage teams reconnoitering LOC bridges and the port approaches."
+    },
+    {
+      "id": "act-cyber-iads",
+      "name": "Cyber effects vs enclave IADS C2",
+      "echelon": "Corps",
+      "contact": "cyber",
+      "from_hours": 8,
+      "to_hours": 60,
+      "geographic": false,
+      "position": null,
+      "source_node_id": "cyber-cell",
+      "target_node_id": "opfor-iads",
+      "note": "Offensive cyber effects degrade enclave air defense command and control ahead of and during close operations."
+    },
+    {
+      "id": "act-gps-jam",
+      "name": "GPS jamming from the enclave",
+      "echelon": "Regiment",
+      "contact": "electronic",
+      "from_hours": 18,
+      "to_hours": 68,
+      "geographic": true,
+      "position": {
+        "lat": 55,
+        "lon": 21.5
+      },
+      "source_node_id": "opfor-ew",
+      "target_node_id": "coastal-corridor",
+      "note": "Persistent GPS jamming across the corridor — the open-source Baltic jamming-report pattern — degrades convoy navigation and precision-logistics tracking."
+    },
+    {
+      "id": "act-rail-interdiction",
+      "name": "Rail corridor interdiction",
+      "echelon": "Brigade",
+      "contact": "indirect",
+      "from_hours": 34,
+      "to_hours": 36,
+      "geographic": true,
+      "position": {
+        "lat": 54.3,
+        "lon": 23.2
+      },
+      "source_node_id": "opfor-srbm",
+      "target_node_id": "rail-yard",
+      "note": "Precision strikes drop the corridor approach bridges at H+36; the gauge-break line is cut and the corridor contested."
+    },
+    {
+      "id": "act-srbm-apod",
+      "name": "OPFOR SRBM salvo vs APOD POWIDZ",
+      "echelon": "Brigade",
+      "contact": "indirect",
+      "from_hours": 38,
+      "to_hours": 42,
+      "geographic": true,
+      "position": {
+        "lat": 52.38,
+        "lon": 17.85
+      },
+      "source_node_id": "opfor-srbm",
+      "target_node_id": "apod-powidz",
+      "note": "SRBM salvo craters the Powidz ramp and fuel farm; the airlift shuttle drops to partial throughput."
+    },
+    {
+      "id": "act-cable-cut",
+      "name": "Undersea cable disruption — Baltic",
+      "echelon": "Squadron",
+      "contact": "maritime",
+      "from_hours": 40,
+      "to_hours": 44,
+      "geographic": true,
+      "position": {
+        "lat": 55.2,
+        "lon": 16
+      },
+      "source_node_id": "opfor-sag",
+      "target_node_id": "cable-landing",
+      "note": "Subsurface action damages the Baltic trunk off Kolobrzeg — mirroring the 2023-2025 subsea-infrastructure incidents."
+    },
+    {
+      "id": "act-convoy-surge",
+      "name": "Convoy surge via coastal LOC",
+      "echelon": "Battalion",
+      "contact": "direct",
+      "from_hours": 38,
+      "to_hours": 56,
+      "geographic": true,
+      "position": {
+        "lat": 55.5,
+        "lon": 21.5
+      },
+      "source_node_id": "port-log",
+      "target_node_id": "dsb",
+      "note": "Escorted convoys push everything the degraded coastal corridor can still carry while the rail line is down."
+    },
+    {
+      "id": "act-port-surge",
+      "name": "Port throughput surge — GDYNIA",
+      "echelon": "Theater",
+      "contact": "maritime",
+      "from_hours": 40,
+      "to_hours": 90,
+      "geographic": true,
+      "position": {
+        "lat": 54.6,
+        "lon": 18.8
+      },
+      "source_node_id": "spod-gdynia",
+      "target_node_id": "port-log",
+      "note": "Round-the-clock discharge at the Gdynia quays — the single terminal now carries division sustainment, ammunition, and interceptor reloads at once."
+    },
+    {
+      "id": "act-awacs-displace",
+      "name": "AEW&C orbit displacement west",
+      "echelon": "Theater",
+      "contact": "air",
+      "from_hours": 44,
+      "to_hours": 52,
+      "geographic": true,
+      "position": {
+        "lat": 52,
+        "lon": 16.5
+      },
+      "source_node_id": "awacs-orbit",
+      "target_node_id": "",
+      "note": "Enclave long-range SAM coverage pushes the orbit west of the Vistula, thinning radar coverage over the corridor."
+    },
+    {
+      "id": "act-himars-counterfire",
+      "name": "HIMARS counter-fire vs SRBM brigade",
+      "echelon": "Battalion",
+      "contact": "indirect",
+      "from_hours": 46,
+      "to_hours": 50,
+      "geographic": true,
+      "position": {
+        "lat": 54.65,
+        "lon": 20.8
+      },
+      "source_node_id": "himars-bn",
+      "target_node_id": "opfor-srbm",
+      "note": "Corps main effort counter-fire, cued by SOF track custody, thins the follow-on salvos aimed at the port."
+    },
+    {
+      "id": "act-ew-counterjam",
+      "name": "Counter-jamming electronic attack",
+      "echelon": "Company",
+      "contact": "electronic",
+      "from_hours": 44,
+      "to_hours": 58,
+      "geographic": true,
+      "position": {
+        "lat": 54.3,
+        "lon": 21.9
+      },
+      "source_node_id": "ew-co",
+      "target_node_id": "opfor-ew",
+      "note": "Electronic attack windows against enclave jammers buy convoy navigation windows on the coastal LOC."
+    },
+    {
+      "id": "act-rail-repair",
+      "name": "Rail bridge repair and yard restoration",
+      "echelon": "Battalion",
+      "contact": "direct",
+      "from_hours": 74,
+      "to_hours": 94,
+      "geographic": true,
+      "position": {
+        "lat": 54.4,
+        "lon": 23.5
+      },
+      "source_node_id": "eng-bn",
+      "target_node_id": "rail-yard",
+      "note": "Engineer bridging and yard repair return the gauge-break line to partial service, taking pressure off the Gdynia terminal."
+    },
+    {
+      "id": "act-cable-repair",
+      "name": "Cable-ship repair operation",
+      "echelon": "Theater",
+      "contact": "maritime",
+      "from_hours": 78,
+      "to_hours": 94,
+      "geographic": true,
+      "position": {
+        "lat": 55,
+        "lon": 15.8
+      },
+      "source_node_id": "",
+      "target_node_id": "cable-landing",
+      "note": "Escorted cable-ship repair of the Baltic trunk; restoration expected by end of Phase III."
+    }
+  ],
+  "overlays": {
+    "annotations": [
+      {
+        "id": "ann-suwalki",
+        "text": "SUWALKI CORRIDOR",
+        "lat": 54.25,
+        "lon": 23.1,
+        "phase_ids": "all"
+      },
+      {
+        "id": "ann-gauge-break",
+        "text": "GAUGE BREAK MOCKAVA",
+        "lat": 54.5,
+        "lon": 23.6,
+        "phase_ids": "all"
+      },
+      {
+        "id": "ann-cable",
+        "text": "CABLE LANDING KOLOBRZEG",
+        "lat": 54.05,
+        "lon": 15.5,
+        "phase_ids": "all"
+      },
+      {
+        "id": "ann-bornholm",
+        "text": "BORNHOLM GAP",
+        "lat": 55.1,
+        "lon": 14.8,
+        "phase_ids": "all"
+      },
+      {
+        "id": "ann-enclave",
+        "text": "OPFOR ENCLAVE",
+        "lat": 54.85,
+        "lon": 20.4,
+        "phase_ids": "all"
+      },
+      {
+        "id": "ann-gdynia",
+        "text": "GDYNIA SPOD",
+        "lat": 54.62,
+        "lon": 18.4,
+        "phase_ids": "all"
+      },
+      {
+        "id": "ann-via-baltica",
+        "text": "VIA BALTICA LOC",
+        "lat": 55.4,
+        "lon": 23.4,
+        "phase_ids": "all"
+      }
+    ],
+    "zones": [
+      {
+        "id": "zone-deep",
+        "kind": "deep",
+        "label": "DEEP AREA — ENCLAVE / SOUTHERN BALTIC",
+        "phase_ids": "all",
+        "points": [
+          {
+            "lat": 56.5,
+            "lon": 18.5
+          },
+          {
+            "lat": 56.5,
+            "lon": 22
+          },
+          {
+            "lat": 54.4,
+            "lon": 22.2
+          },
+          {
+            "lat": 54.3,
+            "lon": 19.5
+          }
+        ]
+      },
+      {
+        "id": "zone-close",
+        "kind": "close",
+        "label": "CLOSE AREA — SUWALKI CORRIDOR",
+        "phase_ids": [
+          "p2",
+          "p3"
+        ],
+        "points": [
+          {
+            "lat": 54.6,
+            "lon": 22.4
+          },
+          {
+            "lat": 54.6,
+            "lon": 24.2
+          },
+          {
+            "lat": 53.7,
+            "lon": 24.2
+          },
+          {
+            "lat": 53.7,
+            "lon": 22.4
+          }
+        ]
+      },
+      {
+        "id": "zone-rear",
+        "kind": "rear",
+        "label": "REAR AREA — POMERANIAN COAST / POWIDZ",
+        "phase_ids": "all",
+        "points": [
+          {
+            "lat": 54.9,
+            "lon": 14.2
+          },
+          {
+            "lat": 54.9,
+            "lon": 19.3
+          },
+          {
+            "lat": 52.2,
+            "lon": 19.3
+          },
+          {
+            "lat": 52.2,
+            "lon": 14.2
+          }
+        ]
+      }
+    ]
+  },
+  "criticality_model": {
+    "weights": {
+      "mission": 20,
+      "echelon": 15,
+      "degree": 20,
+      "betweenness": 20,
+      "failure": 15,
+      "shared": 10
+    },
+    "caps": {
+      "degree": 12,
+      "dependency": 8,
+      "cascade": 20,
+      "shared": 6
+    },
+    "thresholds": {
+      "mission_critical": 75,
+      "high": 50,
+      "moderate": 25
+    },
+    "betweenness_node_limit": 250
+  },
+  "notes": [
+    {
+      "id": "note-port-dal",
+      "ts": "2026-07-04T00:00:00Z",
+      "author": "G5 Plans (synthetic)",
+      "kind": "decision",
+      "text": "DECISION: Nominate the Port Logistics Terminal GDYNIA to the corps defended asset list NLT H+36. Once the rail corridor is cut and the coastal LOC degrades under GPS jamming, the terminal is the sole feed for division sustainment, ammunition, and interceptor reloads — a single point of failure that does not exist in Phase I.",
+      "refs": [
+        {
+          "type": "node",
+          "id": "port-log"
+        },
+        {
+          "type": "link",
+          "id": "l-port-dsb-p2"
+        },
+        {
+          "type": "link",
+          "id": "l-port-gbad-p2"
+        },
+        {
+          "type": "phase",
+          "id": "p2"
+        }
+      ]
+    },
+    {
+      "id": "note-rail-repair",
+      "ts": "2026-07-04T00:00:00Z",
+      "author": "G4 (synthetic)",
+      "kind": "decision",
+      "text": "DECISION: Pre-stage the 52nd Engineer Battalion with bridging and transload equipment vicinity Elk NLT H+30, so gauge-break repair can begin the moment the corridor is retaken — every day the Mockava yard stays down is a day everything rides one terminal.",
+      "refs": [
+        {
+          "type": "node",
+          "id": "rail-yard"
+        },
+        {
+          "type": "node",
+          "id": "eng-bn"
+        },
+        {
+          "type": "activity",
+          "id": "act-rail-repair"
+        }
+      ]
+    },
+    {
+      "id": "note-apod-dispersal",
+      "ts": "2026-07-04T00:00:00Z",
+      "author": "G5 Plans (synthetic)",
+      "kind": "decision",
+      "text": "DECISION: Disperse APOD throughput off the single Powidz ramp before Phase II — pre-negotiate secondary strips, stage rapid runway repair kits, and split the Ramstein shuttle across two fields so one SRBM salvo cannot stop the air line of communication.",
+      "refs": [
+        {
+          "type": "node",
+          "id": "apod-powidz"
+        },
+        {
+          "type": "activity",
+          "id": "act-srbm-apod"
+        },
+        {
+          "type": "phase",
+          "id": "p2"
+        }
+      ]
+    }
+  ],
+  "layout": {
+    "graph_positions": {},
+    "view": "map",
+    "t": 0,
+    "map_viewport": {
+      "x": 0,
+      "y": 0,
+      "k": 1
+    }
+  }
+}

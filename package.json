@@ -1,0 +1,16 @@
+{
+  "name": "operational-systems-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline-capable operational systems planning tool: model a mission system as a dependency graph, place it in global geographic and temporal context, and see what breaks, where, and when.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node app/tests/measure.js",
+    "gates": "bash app/tests/gates.sh",
+    "verify": "npm run gates && npm test",
+    "serve": "node tools/serve.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}
