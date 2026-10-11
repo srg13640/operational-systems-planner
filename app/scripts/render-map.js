@@ -72,14 +72,38 @@
     if (eff > 0.15) drawTileLevel(1, L1_WORLD);          // L1 native ratio 0.5
     if (eff > 0.45) drawTileLevel(2, L2_WORLD);          // L2 native ratio 1.0
     c2d.restore();
-    var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    var isLight = document.documentElement.getAttribute('data-theme') !== 'dark';
     c2d.fillStyle = isLight ? 'rgba(240,245,248,0.14)' : 'rgba(4,8,14,0.30)';
     c2d.fillRect(0, 0, w, h);
   }
 
+  /* Basemap-free fallback (tainted-canvas exports): a 10° graticule with labelled meridians
+     and parallels, so a plotted OV-1 still reads as a map. */
+  function drawGraticule(w, h) {
+    c2d.save();
+    c2d.strokeStyle = cssVar('--line');
+    c2d.fillStyle = cssVar('--fg-dim');
+    c2d.lineWidth = 1;
+    c2d.font = '10px ' + cssVar('--mono');
+    c2d.textBaseline = 'top';
+    for (var lon = -180; lon <= 180; lon += 10) {
+      var a = viewport.worldToScreen(OSP.geo.latLonToWorld(80, lon).x, 0);
+      if (a.x < -1 || a.x > w + 1) continue;
+      c2d.beginPath(); c2d.moveTo(a.x, 0); c2d.lineTo(a.x, h); c2d.stroke();
+      c2d.fillText((lon < 0 ? -lon + 'W' : lon + 'E'), a.x + 3, 3);
+    }
+    for (var lat = -80; lat <= 80; lat += 10) {
+      var b = viewport.worldToScreen(0, OSP.geo.latLonToWorld(lat, 0).y);
+      if (b.y < -1 || b.y > h + 1) continue;
+      c2d.beginPath(); c2d.moveTo(0, b.y); c2d.lineTo(w, b.y); c2d.stroke();
+      c2d.fillText((lat < 0 ? -lat + 'S' : lat + 'N'), 3, b.y + 3);
+    }
+    c2d.restore();
+  }
+
   var CONTACT_COLORS = {
-    direct: '#e4574f', indirect: '#e0a33c', air: '#45d6b4', maritime: '#2e9bd6',
-    electronic: '#9a6dd6', cyber: '#b03a9e', information: '#c9a13b', sensing: '#61a56c'
+    direct: '#b4473f', indirect: '#a66d24', air: '#658993', maritime: '#4f7895',
+    electronic: '#756b8f', cyber: '#786985', information: '#8d7b50', sensing: '#667f6d'
   };
 
   function cssVar(name) {
@@ -103,10 +127,25 @@
     return null;
   }
 
+  /* The viewport's pan is in absolute screen pixels over a cover-fit base scale that depends on
+     the canvas size, so a resize (inspector opening, rail collapsing, window change) would
+     otherwise show a different part of the world. Re-anchor: whatever was under the canvas
+     centre before stays under the centre after. */
+  var lastSize = null;
   function resize() {
     if (!canvas) return;
     dpr = window.devicePixelRatio || 1;
     var w = canvas.clientWidth, h = canvas.clientHeight;
+    if (lastSize && viewport && (lastSize.w !== w || lastSize.h !== h) && lastSize.w > 0 && lastSize.h > 0 && w > 0 && h > 0) {
+      var old = OSP.geo.makeViewport(function () { return lastSize; });
+      old.x = viewport.x; old.y = viewport.y; old.k = viewport.k;
+      var centre = old.screenToWorld(lastSize.w / 2, lastSize.h / 2);
+      var m = viewport.containLayout();
+      viewport.x = w / 2 - (m.x + centre.x * m.s) * viewport.k;
+      viewport.y = h / 2 - (m.y + centre.y * m.s) * viewport.k;
+      viewport.clamp();
+    }
+    if (w > 0 && h > 0) lastSize = { w: w, h: h };
     if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
@@ -128,6 +167,12 @@
 
   function isActive(entity) {
     return OSP.model.isActiveInPhase(entity, ctx.state.graph.phaseId);
+  }
+
+  /* OV-1 concept mode: the map reads as an operational concept graphic — doctrinal symbols,
+     larger labels, no criticality overlay. The analytic lens is one checkbox away. */
+  function conceptMode() {
+    return ctx.state.view === 'ov1' && ctx.state.conceptMode !== false;
   }
 
   function nodeScreenRaw(n) {
@@ -352,8 +397,9 @@
      box would collide with one already drawn. Co-located clusters stay readable. */
   var labelBoxes = [];
   function tryLabel(text, x, y, color, size, force) {
-    var wpx = String(text).length * 6.4 + 6;
-    var box = { x0: x - wpx / 2, x1: x + wpx / 2, y0: y - 11, y1: y + 3 };
+    var px = parseFloat(size) || 11;
+    var wpx = String(text).length * px * 0.58 + 6;
+    var box = { x0: x - wpx / 2, x1: x + wpx / 2, y0: y - px, y1: y + 3 };
     if (!force) {
       for (var i = 0; i < labelBoxes.length; i++) {
         var b = labelBoxes[i];
@@ -373,6 +419,8 @@
     if (finding) finding.affected_node_ids.forEach(function (id) { fNodes[id] = 1; });
     labelBoxes = [];
     var labelQueue = [];
+    var concept = conceptMode();
+    var labelSize = concept ? '12.5px' : '11px';
 
     placedNodes().forEach(function (n) {
       var p = nodeScreen(n);
@@ -380,7 +428,7 @@
       var alpha = active ? 1 : 0.3;
       var isSel = selId === n.id || fNodes[n.id];
       var eff = active ? ctx.state.graph.statusOf(n) : null;
-      var score = (n.metrics && active) ? n.metrics.criticality_score : 0;
+      var score = (n.metrics && active && !concept) ? n.metrics.criticality_score : 0;
       var has2525 = !!OSP.symbols.sidcForNode(n);
       // symbol size follows zoom so theater view stays uncluttered and close-in
       // work gets full-size frames (integer sizes keep the render cache small)
@@ -435,19 +483,29 @@
         });
         hits.push({ x: p.x, y: p.y, r: 20, sel: { type: 'node', id: n.id }, name: n.name, sub: n.node_type + (n.echelon ? ' · ' + n.echelon : '') });
       } else {
-        c2d.beginPath();
-        c2d.arc(p.x, p.y, 7.5, 0, Math.PI * 2);
-        c2d.fillStyle = score >= 75 ? cssVar('--crit') : score >= 50 ? cssVar('--warn') : cssVar('--bg3');
-        c2d.fill();
-        c2d.strokeStyle = sideColor(n.side);
-        c2d.lineWidth = 1.8;
-        c2d.stroke();
+        // software/data nodes: a small square in concept mode (a system, not a unit), a
+        // criticality-colored disc under the analytic lens
+        if (concept) {
+          c2d.fillStyle = cssVar('--bg3');
+          c2d.strokeStyle = sideColor(n.side);
+          c2d.lineWidth = 1.8;
+          c2d.fillRect(p.x - 7, p.y - 7, 14, 14);
+          c2d.strokeRect(p.x - 7, p.y - 7, 14, 14);
+        } else {
+          c2d.beginPath();
+          c2d.arc(p.x, p.y, 7.5, 0, Math.PI * 2);
+          c2d.fillStyle = score >= 75 ? cssVar('--crit') : score >= 50 ? cssVar('--warn') : cssVar('--bg3');
+          c2d.fill();
+          c2d.strokeStyle = sideColor(n.side);
+          c2d.lineWidth = 1.8;
+          c2d.stroke();
+        }
         hits.push({ x: p.x, y: p.y, r: 11, sel: { type: 'node', id: n.id }, name: n.name, sub: n.node_type + (score ? ' · crit ' + Math.round(score) : '') });
       }
       if (st.layers.labels) {
         labelQueue.push({
           text: n.name,
-          x: p.x, y: p.y + (drew || isUnit(n) ? symSize + 9 : 20),
+          x: p.x, y: p.y + (drew || isUnit(n) ? symSize + (concept ? 11 : 9) : 20),
           color: active ? cssVar('--fg') : cssVar('--fg-dim'),
           alpha: alpha,
           priority: (isSel ? 0 : 0) + (isUnit(n) ? 1 : 2) + (active ? 0 : 2),
@@ -461,7 +519,7 @@
     labelQueue.sort(function (a, b) { return a.force !== b.force ? (a.force ? -1 : 1) : a.priority - b.priority; });
     labelQueue.forEach(function (L) {
       c2d.globalAlpha = L.alpha;
-      tryLabel(L.text, L.x, L.y, L.color, '11px', L.force);
+      tryLabel(L.text, L.x, L.y, L.color, labelSize, L.force);
       c2d.globalAlpha = 1;
     });
   }
@@ -487,7 +545,7 @@
   function haloText(text, x, y, color, size, align) {
     c2d.font = '600 ' + (size || '11px') + ' ' + cssVar('--sans');
     c2d.textAlign = align || 'left';
-    var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    var isLight = document.documentElement.getAttribute('data-theme') !== 'dark';
     c2d.strokeStyle = isLight ? 'rgba(242,245,247,0.85)' : 'rgba(6,10,16,0.85)';
     c2d.lineWidth = 3;
     c2d.strokeText(text, x, y);
@@ -574,9 +632,11 @@
 
   /* ---- export drawing ---- */
 
-  function exportDraw(target, w, h) {
+  function exportDraw(target, w, h, opts) {
     // Redraw the map from the model at export size using a temporary viewport state.
-    var savedCanvas = canvas, savedC2d = c2d, savedViewport = viewport, savedDpr = dpr;
+    // opts.noBasemap: skip the tile layer (over file:// the tiles taint the export canvas).
+    var savedCanvas = canvas, savedC2d = c2d, savedViewport = viewport, savedDpr = dpr, savedBase = baseReady;
+    if (opts && opts.noBasemap) baseReady = false;
     canvas = { clientWidth: w, clientHeight: h, width: w, height: h, classList: { add: function () {}, remove: function () {} } };
     c2d = target;
     dpr = 1;
@@ -589,7 +649,7 @@
     try {
       renderInner(w, h);
     } finally {
-      canvas = savedCanvas; c2d = savedC2d; viewport = savedViewport; dpr = savedDpr;
+      canvas = savedCanvas; c2d = savedC2d; viewport = savedViewport; dpr = savedDpr; baseReady = savedBase;
     }
   }
 
@@ -598,6 +658,7 @@
     c2d.fillStyle = cssVar('--bg0');
     c2d.fillRect(0, 0, w, h);
     if (baseReady) drawBasemap(w, h);
+    else drawGraticule(w, h);
     drawZones();
     if (ctx.state.layers.links) drawLinks();
     if (ctx.state.layers.activities) drawActivities();

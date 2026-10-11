@@ -1,6 +1,6 @@
 {
   "kind": "osp-scenario",
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "meta": {
     "id": "osp-demo-pacific-sentinel",
     "name": "Operation PACIFIC SENTINEL",
@@ -27,7 +27,12 @@
       "marking": "UNCLASSIFIED",
       "banner_caveat": "NOTIONAL - FICTIONAL DATA",
       "prototype": true
-    }
+    },
+    "mission_statement": "I Corps (FWD) conducts multidomain operations across the first island chain to enable joint force freedom of action, while preserving mission command and sustainment reach-back through a contested Phase I fiber cut and Phase II relay strike.",
+    "purpose": "Demonstration architecture: show how a corps operational architecture (OV-1/OV-2/OV-4) and its supporting systems architecture (SV-1/SV-2) shift across phases, and where the reach-back dependency converges.",
+    "architect": "OSP demo authoring (synthetic)",
+    "version": "1.2",
+    "as_of": "2026-07-03"
   },
   "timeline": {
     "duration_hours": 96,
@@ -63,6 +68,7 @@
       "id": "corps-main",
       "name": "I Corps (FWD) Main Command Post",
       "node_type": "command_post",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -88,7 +94,7 @@
         "hq": true,
         "cp": "MAIN"
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD)",
       "vulnerability_notes": "Main CP, COP servers, and co-located data systems draw from a single prime power generator farm.",
       "tags": [
@@ -102,6 +108,7 @@
       "id": "corps-tac",
       "name": "I Corps (FWD) Tactical Command Post",
       "node_type": "command_post",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -127,7 +134,7 @@
         "hq": true,
         "cp": "TAC"
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD)",
       "vulnerability_notes": "",
       "tags": [
@@ -135,12 +142,14 @@
         "hq",
         "tac-cp"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "div-hq",
       "name": "25th ID (Slice) Division Headquarters",
       "node_type": "headquarters",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Division",
@@ -166,19 +175,21 @@
         "hq": true,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "25th ID (Slice)",
       "vulnerability_notes": "",
       "tags": [
         "c2",
         "hq"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "opcon"
     },
     {
       "id": "jagic",
       "name": "25th ID JAGIC",
       "node_type": "command_post",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Division",
@@ -204,7 +215,7 @@
         "hq": false,
         "cp": "JAGIC"
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "25th ID (Slice) G3 Air",
       "vulnerability_notes": "Joint data feeds ride the Palawan fiber trunk in Phase I and reroute to SATCOM after H+36.",
       "tags": [
@@ -212,12 +223,14 @@
         "fires",
         "airspace"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "opcon"
     },
     {
       "id": "fires-cell",
       "name": "I Corps (FWD) Fires Cell",
       "node_type": "directorate",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -243,19 +256,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) FSE",
       "vulnerability_notes": "",
       "tags": [
         "fires",
         "targeting"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "sust-bde",
       "name": "17th Sustainment Brigade HQ",
       "node_type": "headquarters",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -281,19 +296,21 @@
         "hq": true,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "17th Sustainment Brigade",
       "vulnerability_notes": "",
       "tags": [
         "sustainment",
         "hq"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "lrpf-bty",
       "name": "Btry A, 1-181 Long-Range Fires Battalion (LRPF)",
       "node_type": "shooter",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battery",
@@ -319,7 +336,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) FSE",
       "vulnerability_notes": "Fire mission data reach-back rides SATCOM through Ground Station KILO after the Phase I fiber trunk is cut.",
       "tags": [
@@ -327,12 +344,14 @@
         "lrpf",
         "kill-chain"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "attached"
     },
     {
       "id": "avn-tf",
       "name": "Task Force Talon (Aviation)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battalion",
@@ -358,19 +377,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "25th ID (Slice)",
       "vulnerability_notes": "",
       "tags": [
         "aviation",
         "maneuver"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "attached"
     },
     {
       "id": "mlrs-bn",
       "name": "2-95 Field Artillery (MLRS)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battalion",
@@ -396,19 +417,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) FSE",
       "vulnerability_notes": "",
       "tags": [
         "fires",
         "mlrs"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "attached"
     },
     {
       "id": "satcom-gw",
       "name": "SATCOM Gateway ECHO",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -434,7 +457,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G6",
       "vulnerability_notes": "Phase II reroute concentrates fires, sustainment, and JAGIC traffic on this single gateway path.",
       "tags": [
@@ -442,12 +465,14 @@
         "transport",
         "backbone"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "sat-wgs-11",
       "name": "WGS-11 (Wideband SATCOM)",
       "node_type": "satellite",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Space Force",
       "echelon": "National",
@@ -473,7 +498,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "USSF 4th SOPS",
       "vulnerability_notes": "",
       "tags": [
@@ -486,6 +511,7 @@
       "id": "sat-wgs-6",
       "name": "WGS-6 (Wideband SATCOM)",
       "node_type": "satellite",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Space Force",
       "echelon": "National",
@@ -511,7 +537,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "USSF 4th SOPS",
       "vulnerability_notes": "",
       "tags": [
@@ -525,6 +551,7 @@
       "id": "gs-kilo",
       "name": "Ground Station KILO",
       "node_type": "ground_station",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -550,7 +577,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "DISA Pacific",
       "vulnerability_notes": "Becomes the sole reach-back teleport for the corps once the Palawan trunk is cut (H+36) and Relay Site WHISKEY is struck (H+40) — a Phase II single point of failure that does not exist in Phase I.",
       "tags": [
@@ -564,6 +591,7 @@
       "id": "relay-whiskey",
       "name": "Relay Site WHISKEY",
       "node_type": "relay",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -592,7 +620,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater Signal Command",
       "vulnerability_notes": "",
       "tags": [
@@ -605,6 +633,7 @@
       "id": "fiber-palawan",
       "name": "Fiber Node PALAWAN",
       "node_type": "facility",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -633,7 +662,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater J6 (leased commercial trunk)",
       "vulnerability_notes": "",
       "tags": [
@@ -646,6 +675,7 @@
       "id": "theater-net",
       "name": "Theater Network Node GUAM",
       "node_type": "network",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -671,7 +701,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater Signal Command",
       "vulnerability_notes": "",
       "tags": [
@@ -684,6 +714,7 @@
       "id": "mesh-node",
       "name": "Corps Tactical Mesh Node",
       "node_type": "network",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -709,19 +740,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G6",
       "vulnerability_notes": "",
       "tags": [
         "network",
         "mesh"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "oth-radar",
       "name": "OTH Radar Detachment PALAU",
       "node_type": "sensor",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Detachment",
@@ -747,7 +780,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater ISR Task Force",
       "vulnerability_notes": "",
       "tags": [
@@ -760,6 +793,7 @@
       "id": "uas-det",
       "name": "Corps UAS Detachment (Gray Eagle)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Detachment",
@@ -785,19 +819,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "25th ID (Slice) G2",
       "vulnerability_notes": "",
       "tags": [
         "sensor",
         "uas"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "assigned"
     },
     {
       "id": "mpa-sqdn",
       "name": "Maritime Patrol Squadron DET (P-8)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Navy",
       "echelon": "Squadron",
@@ -823,7 +859,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "CTF-72",
       "vulnerability_notes": "",
       "tags": [
@@ -836,6 +872,7 @@
       "id": "sigint-elm",
       "name": "Corps SIGINT Collection Element",
       "node_type": "sensor",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Detachment",
@@ -861,19 +898,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G2",
       "vulnerability_notes": "",
       "tags": [
         "sensor",
         "sigint"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "assigned"
     },
     {
       "id": "port-subic",
       "name": "Port Logistics Node SUBIC",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -899,19 +938,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "17th Sustainment Brigade",
       "vulnerability_notes": "",
       "tags": [
         "sustainment",
         "seaport"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "apod-clark",
       "name": "Airfield Logistics Node CLARK (APOD)",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -937,19 +978,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "17th Sustainment Brigade",
       "vulnerability_notes": "",
       "tags": [
         "sustainment",
         "apod"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "atp-tarlac",
       "name": "Ammunition Transfer Point TARLAC",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Company",
@@ -975,19 +1018,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "17th Sustainment Brigade",
       "vulnerability_notes": "",
       "tags": [
         "sustainment",
         "class-v"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "sust-c2-sys",
       "name": "Sustainment C2 System",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -1013,19 +1058,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "17th Sustainment Brigade SPO",
       "vulnerability_notes": "Reach-back rides the Palawan fiber trunk in Phase I and reroutes to SATCOM through Ground Station KILO after H+36.",
       "tags": [
         "sustainment",
         "c2-system"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "ada-bn",
       "name": "1-62 ADA Battalion (Patriot)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battalion",
@@ -1051,19 +1098,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD)",
       "vulnerability_notes": "",
       "tags": [
         "protection",
         "amd"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "attached"
     },
     {
       "id": "cuas-bty",
       "name": "C-UAS Battery, 1-62 ADA",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battery",
@@ -1089,19 +1138,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "1-62 ADA",
       "vulnerability_notes": "",
       "tags": [
         "protection",
         "c-uas"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "attached"
     },
     {
       "id": "ew-co",
       "name": "Corps EW Company",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Company",
@@ -1127,19 +1178,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G3",
       "vulnerability_notes": "",
       "tags": [
         "effects",
         "ew"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "assigned"
     },
     {
       "id": "cyber-cell",
       "name": "Corps Cyber Effects Planning Cell",
       "node_type": "office",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -1165,19 +1218,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G3",
       "vulnerability_notes": "",
       "tags": [
         "effects",
         "cyber"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "assigned"
     },
     {
       "id": "mcp-sys",
       "name": "Mission Command Platform (Corps COP)",
       "node_type": "application",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -1203,7 +1258,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G3/G6",
       "vulnerability_notes": "",
       "tags": [
@@ -1211,12 +1266,14 @@
         "cop",
         "mission-command"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "fires-data-sys",
       "name": "Fires Data System",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -1242,7 +1299,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) FSE",
       "vulnerability_notes": "Depends on GPS timing for synchronization; degraded GPS slows the Phase II kill chain.",
       "tags": [
@@ -1250,12 +1307,14 @@
         "fires",
         "kill-chain"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "log-data-sys",
       "name": "Logistics Data System",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -1281,19 +1340,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "17th Sustainment Brigade SPO",
       "vulnerability_notes": "",
       "tags": [
         "system",
         "logistics"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "intel-db",
       "name": "Corps Intelligence Database",
       "node_type": "database",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -1319,19 +1380,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "I Corps (FWD) G2",
       "vulnerability_notes": "",
       "tags": [
         "system",
         "intelligence"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "opfor-c2",
       "name": "OPFOR Regional C2 Node",
       "node_type": "command_post",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Operational",
@@ -1357,7 +1420,7 @@
         "hq": true,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
@@ -1370,6 +1433,7 @@
       "id": "opfor-iads",
       "name": "OPFOR Integrated Air Defense Complex",
       "node_type": "system",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Operational",
@@ -1395,19 +1459,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
         "opfor",
         "iads"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "opfor-ascm",
       "name": "OPFOR Coastal ASCM Battery",
       "node_type": "shooter",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Battery",
@@ -1433,19 +1499,21 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
         "opfor",
         "ascm"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "kadena-apod",
       "name": "Airfield Logistics Node KADENA (APOD)",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Air Force",
       "echelon": "Theater",
@@ -1473,7 +1541,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater JDDOC",
       "vulnerability_notes": "Theater air throughput concentrates on two large, targetable ramps — the airfield-attack problem open-source wargames raise again and again.",
       "tags": [
@@ -1487,6 +1555,7 @@
       "id": "tanker-tf",
       "name": "Theater Tanker Task Force (KC-135/KC-46)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Air Force",
       "echelon": "Wing",
@@ -1512,7 +1581,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater Air Component",
       "vulnerability_notes": "Wargames consistently flag tankers as a critical enabler and a lucrative target: too few airframes, large signatures, and every deep sortie depends on them.",
       "tags": [
@@ -1526,6 +1595,7 @@
       "id": "pla-rf-bde",
       "name": "OPFOR Rocket Force Brigade (TBM)",
       "node_type": "shooter",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Brigade",
@@ -1551,7 +1621,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
@@ -1559,12 +1629,14 @@
         "tbm",
         "missile-salvo"
       ],
-      "notes": ""
+      "notes": "",
+      "parent_relationship": "organic"
     },
     {
       "id": "mps-guam",
       "name": "Maritime Prepositioning Ships Squadron GUAM",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Navy",
       "echelon": "Squadron",
@@ -1590,7 +1662,7 @@
         "hq": false,
         "cp": ""
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "MSC / Theater JDDOC",
       "vulnerability_notes": "Prepositioning is the hedge against a precision-munitions magazine measured in days — but the ships are soft targets until escorted forward.",
       "tags": [
@@ -1619,9 +1691,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Corps command relationship; TAC CP assumes control of the close fight in Phase II."
+      "notes": "Corps command relationship; TAC CP assumes control of the close fight in Phase II.",
+      "link_class": "org"
     },
     {
       "id": "l-cmd-div",
@@ -1640,9 +1713,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-jagic-fires",
@@ -1661,9 +1735,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Joint air-ground deconfliction and airspace control measures feed to the corps fires cell."
+      "notes": "Joint air-ground deconfliction and airspace control measures feed to the corps fires cell.",
+      "link_class": "flow",
+      "resource": "Target nominations",
+      "resource_kind": "information",
+      "protocol": "Link 16 / JADOCS"
     },
     {
       "id": "l-fires-lrpf",
@@ -1682,9 +1760,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-fires-mlrs",
@@ -1703,9 +1782,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-div-avn",
@@ -1724,9 +1804,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-tac-mesh",
@@ -1745,9 +1826,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "TAC CP reaches the Main CP network over the line-of-sight tactical mesh."
+      "notes": "TAC CP reaches the Main CP network over the line-of-sight tactical mesh.",
+      "link_class": "flow",
+      "resource": "Corps C2 traffic",
+      "resource_kind": "information",
+      "protocol": "IP/mesh"
     },
     {
       "id": "l-mesh-main",
@@ -1766,9 +1851,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Corps C2 traffic",
+      "resource_kind": "information",
+      "protocol": "IP/mesh"
     },
     {
       "id": "l-mcp-gw",
@@ -1787,9 +1876,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Primary reach-back transport for the corps common operational picture in all phases."
+      "notes": "Primary reach-back transport for the corps common operational picture in all phases.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-main-hosts-mcp",
@@ -1808,9 +1901,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "COP server stack is hosted in the Main CP on shared prime power."
+      "notes": "COP server stack is hosted in the Main CP on shared prime power.",
+      "link_class": "flow",
+      "resource": "Hosting (power, LAN, admin)",
+      "resource_kind": "other",
+      "protocol": "LAN"
     },
     {
       "id": "l-intel-mcp",
@@ -1829,9 +1926,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Intelligence picture",
+      "resource_kind": "information",
+      "protocol": "DB replication"
     },
     {
       "id": "l-log-mcp",
@@ -1850,9 +1951,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "CUI logistics status feed crosses a classification boundary into the SECRET COP through a one-way guard."
+      "notes": "CUI logistics status feed crosses a classification boundary into the SECRET COP through a one-way guard.",
+      "link_class": "flow",
+      "resource": "Logistics status",
+      "resource_kind": "information",
+      "protocol": "REST API"
     },
     {
       "id": "l-fires-uses-fd",
@@ -1871,9 +1976,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "dependency",
+      "resource": "Fire mission processing",
+      "resource_kind": "information",
+      "protocol": "LAN"
     },
     {
       "id": "l-fd-lrpf",
@@ -1892,9 +2001,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Fire mission and technical fire direction data to the LRPF battery."
+      "notes": "Fire mission and technical fire direction data to the LRPF battery.",
+      "link_class": "flow",
+      "resource": "Fire missions",
+      "resource_kind": "information",
+      "protocol": "VMF / AFATDS"
     },
     {
       "id": "l-fd-mlrs",
@@ -1913,9 +2026,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Fire missions",
+      "resource_kind": "information",
+      "protocol": "VMF / AFATDS"
     },
     {
       "id": "l-jagic-intel",
@@ -1934,9 +2051,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "dependency",
+      "resource": "Intelligence picture",
+      "resource_kind": "information",
+      "protocol": "DB replication"
     },
     {
       "id": "l-intel-fd",
@@ -1955,9 +2076,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Target intelligence and battle damage assessment feed into the fires data system."
+      "notes": "Target intelligence and battle damage assessment feed into the fires data system.",
+      "link_class": "flow",
+      "resource": "Targeting data",
+      "resource_kind": "information",
+      "protocol": "REST API"
     },
     {
       "id": "l-oth-intel",
@@ -1976,9 +2101,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Wide-area maritime surveillance track data."
+      "notes": "Wide-area maritime surveillance track data.",
+      "link_class": "flow",
+      "resource": "Maritime surveillance tracks",
+      "resource_kind": "information",
+      "protocol": "IP/WAN"
     },
     {
       "id": "l-uas-jagic",
@@ -1997,9 +2126,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Full-motion video and target development to the JAGIC."
+      "notes": "Full-motion video and target development to the JAGIC.",
+      "link_class": "flow",
+      "resource": "UAS full-motion video",
+      "resource_kind": "information",
+      "protocol": "TCDL"
     },
     {
       "id": "l-mpa-intel",
@@ -2018,9 +2151,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "P-8 maritime patrol mission data via narrowband SATCOM (independent of the corps gateway)."
+      "notes": "P-8 maritime patrol mission data via narrowband SATCOM (independent of the corps gateway).",
+      "link_class": "flow",
+      "resource": "Maritime patrol reports",
+      "resource_kind": "information",
+      "protocol": "SATCOM"
     },
     {
       "id": "l-sigint-intel",
@@ -2039,16 +2176,20 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "SIGINT reports",
+      "resource_kind": "information",
+      "protocol": "IP/WAN"
     },
     {
       "id": "l-hf-fallback",
       "source": "corps-tac",
       "target": "lrpf-bty",
-      "relationship_type": "communicates_with",
-      "direction": "bidirectional",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
       "communication_method": "UHF/VHF/HF Radio",
       "bandwidth": "",
       "latency": "",
@@ -2060,9 +2201,14 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Legacy HF fallback net awaiting crypto fill — currently passes SECRET traffic unencrypted."
+      "notes": "Voice/data fallback for fire missions when the fires data path is down; slower, lower capacity.",
+      "link_class": "flow",
+      "name": "HF fallback fire-mission net",
+      "resource": "Fire missions",
+      "resource_kind": "information",
+      "protocol": "HF voice/data"
     },
     {
       "id": "l-sust-uses-c2",
@@ -2081,9 +2227,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "dependency",
+      "resource": "Sustainment C2 access",
+      "resource_kind": "information",
+      "protocol": "LAN"
     },
     {
       "id": "l-log-sustc2",
@@ -2102,9 +2252,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Logistics status",
+      "resource_kind": "information",
+      "protocol": "REST API"
     },
     {
       "id": "l-port-atp",
@@ -2123,9 +2277,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Ground line of communication: Class V throughput from Subic to the Tarlac ATP."
+      "notes": "Ground line of communication: Class V throughput from Subic to the Tarlac ATP.",
+      "link_class": "flow",
+      "resource": "Class V",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-apod-avn",
@@ -2144,9 +2302,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Aviation fuel and Class IX flow from the Clark APOD."
+      "notes": "Aviation fuel and Class IX flow from the Clark APOD.",
+      "link_class": "flow",
+      "resource": "Class III/V",
+      "resource_kind": "materiel",
+      "protocol": "Airlift"
     },
     {
       "id": "l-atp-courier",
@@ -2165,9 +2327,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Daily ammunition status delivered by ground courier — manual reporting gate with roughly 12-hour latency."
+      "notes": "Daily ammunition status delivered by ground courier — manual reporting gate with roughly 12-hour latency.",
+      "link_class": "flow",
+      "resource": "Ammunition status",
+      "resource_kind": "information",
+      "protocol": "Courier"
     },
     {
       "id": "l-port-log",
@@ -2186,9 +2352,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Port throughput and vessel discharge status feed."
+      "notes": "Port throughput and vessel discharge status feed.",
+      "link_class": "flow",
+      "resource": "Port throughput status",
+      "resource_kind": "information",
+      "protocol": "IP/WAN"
     },
     {
       "id": "l-ada-main",
@@ -2207,9 +2377,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "effect"
     },
     {
       "id": "l-ada-gw",
@@ -2228,9 +2399,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Patriot coverage of the gateway site — corps defended asset list serial 2."
+      "notes": "Patriot coverage of the gateway site — corps defended asset list serial 2.",
+      "link_class": "effect"
     },
     {
       "id": "l-cuas-port",
@@ -2249,9 +2421,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "effect"
     },
     {
       "id": "l-ew-iads",
@@ -2272,9 +2445,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Electronic attack against OPFOR early-warning radars during close operations."
+      "notes": "Electronic attack against OPFOR early-warning radars during close operations.",
+      "link_class": "effect"
     },
     {
       "id": "l-cyber-opforc2",
@@ -2296,9 +2470,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Offensive cyber effects against OPFOR IADS C2, authorized H+6 to H+60."
+      "notes": "Offensive cyber effects against OPFOR IADS C2, authorized H+6 to H+60.",
+      "link_class": "effect"
     },
     {
       "id": "l-lrpf-ascm",
@@ -2319,9 +2494,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Priority target: OPFOR coastal ASCM battery."
+      "notes": "Priority target: OPFOR coastal ASCM battery.",
+      "link_class": "effect"
     },
     {
       "id": "l-mlrs-iads",
@@ -2343,9 +2519,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "effect"
     },
     {
       "id": "l-oth-ascm",
@@ -2364,9 +2541,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Track custody of ASCM battery movements in support of target development."
+      "notes": "Track custody of ASCM battery movements in support of target development.",
+      "link_class": "effect"
     },
     {
       "id": "l-opfor-c2-iads",
@@ -2385,9 +2563,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-opfor-c2-ascm",
@@ -2406,9 +2585,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-gw-wgs11",
@@ -2427,9 +2607,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Primary wideband uplink."
+      "notes": "Primary wideband uplink.",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-gw-wgs6",
@@ -2448,9 +2632,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Alternate wideband uplink supporting the WHISKEY relay path."
+      "notes": "Alternate wideband uplink supporting the WHISKEY relay path.",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-kilo-wgs11",
@@ -2469,9 +2657,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-whiskey-wgs6",
@@ -2490,9 +2682,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-gw-kilo",
@@ -2511,9 +2707,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "All gateway wideband traffic lands at the KILO teleport."
+      "notes": "All gateway wideband traffic lands at the KILO teleport.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-kilo-theater",
@@ -2532,9 +2732,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Teleport-to-theater-network terrestrial segment on Guam — no diverse terrestrial route."
+      "notes": "Teleport-to-theater-network terrestrial segment on Guam — no diverse terrestrial route.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-gw-whiskey",
@@ -2553,9 +2757,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Alternate reach-back path; Relay Site WHISKEY is struck at H+40 and degraded for the remainder of the operation."
+      "notes": "Alternate reach-back path; Relay Site WHISKEY is struck at H+40 and degraded for the remainder of the operation.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-whiskey-theater",
@@ -2574,9 +2782,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-sustc2-fiber",
@@ -2597,9 +2809,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Primary sustainment reach-back rides the undersea trunk in Phase I; trunk is cut by adversary action at H+36."
+      "notes": "Primary sustainment reach-back rides the undersea trunk in Phase I; trunk is cut by adversary action at H+36.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-log-fiber",
@@ -2620,9 +2836,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Logistics data replication via the undersea trunk; severed at H+36."
+      "notes": "Logistics data replication via the undersea trunk; severed at H+36.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-jagic-fiber",
@@ -2643,9 +2863,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "JAGIC joint data feeds ride the fiber trunk in Phase I; lost when the trunk is cut at H+36."
+      "notes": "JAGIC joint data feeds ride the fiber trunk in Phase I; lost when the trunk is cut at H+36.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-intel-fiber",
@@ -2666,9 +2890,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Bulk intelligence replication via the undersea trunk in Phase I."
+      "notes": "Bulk intelligence replication via the undersea trunk in Phase I.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-fiber-theater",
@@ -2689,9 +2917,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Single undersea trunk with no diverse path — cut by adversary action at H+36."
+      "notes": "Single undersea trunk with no diverse path — cut by adversary action at H+36.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-sustc2-gw-p2",
@@ -2713,9 +2945,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Fiber trunk lost at H+36 — sustainment C2 reach-back rerouted to the corps SATCOM gateway."
+      "notes": "Fiber trunk lost at H+36 — sustainment C2 reach-back rerouted to the corps SATCOM gateway.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-log-gw-p2",
@@ -2737,9 +2973,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Logistics data replication rerouted to SATCOM after the trunk cut."
+      "notes": "Logistics data replication rerouted to SATCOM after the trunk cut.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-jagic-gw-p2",
@@ -2761,9 +3001,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "JAGIC joint data feeds rerouted to SATCOM after the trunk cut."
+      "notes": "JAGIC joint data feeds rerouted to SATCOM after the trunk cut.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-fd-gw-p2",
@@ -2785,9 +3029,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "LRPF fires data reach-back rides SATCOM once the fiber trunk is down."
+      "notes": "LRPF fires data reach-back rides SATCOM once the fiber trunk is down.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-sustc2-kilo-p2",
@@ -2809,9 +3057,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Rerouted sustainment traffic lands at Ground Station KILO — no alternate teleport after the WHISKEY strike at H+40."
+      "notes": "Rerouted sustainment traffic lands at Ground Station KILO — no alternate teleport after the WHISKEY strike at H+40.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-log-kilo-p2",
@@ -2833,9 +3085,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-jagic-kilo-p2",
@@ -2857,9 +3113,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "JAGIC joint fires and airspace data now single-threaded through KILO."
+      "notes": "JAGIC joint fires and airspace data now single-threaded through KILO.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-fd-kilo-p2",
@@ -2881,17 +3141,21 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "LRPF kill-chain data single-threaded through Ground Station KILO in Phase II."
+      "notes": "LRPF kill-chain data single-threaded through Ground Station KILO in Phase II.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-tanker-avn",
       "source": "tanker-tf",
       "target": "avn-tf",
-      "relationship_type": "supports",
+      "relationship_type": "supplies",
       "direction": "directed",
-      "communication_method": "Tactical Data Link",
+      "communication_method": "Other",
       "bandwidth": "",
       "latency": "",
       "resilience": 2,
@@ -2902,17 +3166,21 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Aerial refueling extends Task Force Talon's reach; a handful of tanker orbits underwrite every deep aviation mission."
+      "notes": "Aerial refueling extends Task Force Talon's reach; a handful of tanker orbits underwrite every deep aviation mission.",
+      "link_class": "flow",
+      "resource": "Aerial refueling",
+      "resource_kind": "materiel",
+      "protocol": "Air-to-air"
     },
     {
       "id": "l-tanker-mpa",
       "source": "tanker-tf",
       "target": "mpa-sqdn",
-      "relationship_type": "supports",
+      "relationship_type": "supplies",
       "direction": "directed",
-      "communication_method": "Tactical Data Link",
+      "communication_method": "Other",
       "bandwidth": "",
       "latency": "",
       "resilience": 2,
@@ -2923,9 +3191,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Tanker support keeps P-8 orbits on station over the Bashi Channel — wargame range math makes ISR persistence a tanker problem."
+      "notes": "Tanker support keeps P-8 orbits on station over the Bashi Channel — wargame range math makes ISR persistence a tanker problem.",
+      "link_class": "flow",
+      "resource": "Aerial refueling",
+      "resource_kind": "materiel",
+      "protocol": "Air-to-air"
     },
     {
       "id": "l-kadena-tanker",
@@ -2944,9 +3216,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Fuel, crews, and maintenance for the tanker force stage from the Kadena ramp — basing concentration the salvo threat is built to exploit."
+      "notes": "Fuel, crews, and maintenance for the tanker force stage from the Kadena ramp — basing concentration the salvo threat is built to exploit.",
+      "link_class": "flow",
+      "resource": "Class III (aviation fuel)",
+      "resource_kind": "materiel",
+      "protocol": "Airfield services"
     },
     {
       "id": "l-kadena-clark",
@@ -2965,9 +3241,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Intra-theater resupply air bridge from Kadena into the Clark APOD — nearly all theater air throughput rides two ramps."
+      "notes": "Intra-theater resupply air bridge from Kadena into the Clark APOD — nearly all theater air throughput rides two ramps.",
+      "link_class": "flow",
+      "resource": "Class III/V",
+      "resource_kind": "materiel",
+      "protocol": "Intratheater airlift"
     },
     {
       "id": "l-mps-port",
@@ -2989,9 +3269,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Surge sealift of prepositioned stocks into Subic once contested sustainment begins — physical supply flow, independent of the KILO comms path."
+      "notes": "Surge sealift of prepositioned stocks into Subic once contested sustainment begins — physical supply flow, independent of the KILO comms path.",
+      "link_class": "flow",
+      "resource": "Prepositioned stocks",
+      "resource_kind": "materiel",
+      "protocol": "Sealift"
     },
     {
       "id": "l-rf-kadena",
@@ -3012,9 +3296,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Heavy TBM salvos against theater air bases open Phase II — ramp and runway damage at the APODs is the signature open-source wargame move."
+      "notes": "Heavy TBM salvos against theater air bases open Phase II — ramp and runway damage at the APODs is the signature open-source wargame move.",
+      "link_class": "effect"
     },
     {
       "id": "l-rf-clark",
@@ -3035,9 +3320,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Clark APOD sits on the same salvo target deck; cratered runways stop the air bridge at both ends at once."
+      "notes": "Clark APOD sits on the same salvo target deck; cratered runways stop the air bridge at both ends at once.",
+      "link_class": "effect"
     },
     {
       "id": "l-rf-kilo",
@@ -3058,9 +3344,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Follow-on salvo aimpoint in the Andersen complex: the teleport whose loss would sever the corps' only remaining reach-back."
+      "notes": "Follow-on salvo aimpoint in the Andersen complex: the teleport whose loss would sever the corps' only remaining reach-back.",
+      "link_class": "effect"
     },
     {
       "id": "l-lrpf-rf",
@@ -3082,9 +3369,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Counter-fire tasking: LRPF holds the OPFOR rocket force brigade at risk to thin follow-on salvos."
+      "notes": "Counter-fire tasking: LRPF holds the OPFOR rocket force brigade at risk to thin follow-on salvos.",
+      "link_class": "effect"
     }
   ],
   "vulnerabilities": [

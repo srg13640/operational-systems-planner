@@ -12,10 +12,26 @@
 
   var DEFAULTS = {
     weights: { mission: 20, echelon: 15, degree: 20, betweenness: 20, failure: 15, shared: 10 },
-    caps: { degree: 12, dependency: 8, cascade: 20, shared: 6 },
-    thresholds: { mission_critical: 75, high: 50, moderate: 25 },
+    caps: { degree: 12, dependency: 8, cascade: 12, shared: 6, betweenness: 0.25 },
+    thresholds: { mission_critical: 70, high: 50, moderate: 30 },
     betweenness_node_limit: 250
   };
+
+  /* Links the metrics see. Effect links (targets/protects) are excluded outright: an enemy
+     brigade must not inherit the failure impact of the airfields it targets, and a Patriot
+     battalion is not a "provider" to the gateway it covers. Org links count as connectivity
+     (a headquarters is central) but never as dependencies. */
+  function metricLinks(graph) {
+    return graph.links.filter(function (l) { return OSP.model.linkClassOf(l) !== 'effect'; });
+  }
+  /* Whose criticality a link's failure_impact raises: the provider (losing it loses the link),
+     the authority holder for org links, both endpoints for symmetric flows. */
+  function failureOwners(link) {
+    var dep = OSP.model.dependencyProvider(link);
+    if (dep) return link.direction === 'bidirectional' ? [link.source, link.target] : [dep.provider];
+    if (OSP.model.linkClassOf(link) === 'org') return [link.source];
+    return [link.source, link.target];
+  }
 
   function num(v, dflt) {
     var n = parseFloat(v);
@@ -62,10 +78,10 @@
 
   /* Undirected distinct-neighbor lists (sorted for determinism). The centrality
      measures treat the graph as undirected over links, matching the source tool. */
-  function buildUndirectedNeighbors(graph, ids) {
+  function buildUndirectedNeighbors(links, ids) {
     var sets = {};
     ids.forEach(function (id) { sets[id] = {}; });
-    graph.links.forEach(function (l) {
+    links.forEach(function (l) {
       sets[l.source][l.target] = 1;
       sets[l.target][l.source] = 1;
     });
@@ -74,8 +90,71 @@
     return out;
   }
 
-  /* BFS downstream over dependentsOf: how many nodes transitively depend on each node. */
-  function cascadeBlastRadius(ids, dependentsDistinct) {
+  /* Resource needs per node: resourceKey -> { providers: { providerId: 1 }, essential }, from
+     flow/dependency links. Every healthy provider of a resource is a substitute for every other
+     (a strength-2 HF fallback is still a source of fire missions). Only a resource the node
+     needs at ESSENTIAL_STRENGTH or above makes it fall when the last source goes; losing one
+     of three sensor feeds degrades an intelligence database, it does not take it down.
+     MIN_NEED_STRENGTH is the floor below which a link is not a need at all. Only providers and
+     links that are healthy this hour count — a Degraded relay is not a source you can fall
+     back on. */
+  var MIN_NEED_STRENGTH = 2;
+  var ESSENTIAL_STRENGTH = 4;
+  var HEALTHY = { Active: 1, Unknown: 1, Planned: 1 };
+  function buildNeeds(graph, ids) {
+    var needs = {};
+    ids.forEach(function (id) {
+      var byKey = {};
+      (graph.providerLinksOf[id] || []).forEach(function (pl) {
+        var prov = graph.nodesById[pl.provider];
+        if (!prov || !HEALTHY[graph.statusOf(prov)] || !HEALTHY[graph.statusOf(pl.link)]) return;
+        var key = OSP.model.resourceKeyOf(pl.link);
+        if (!byKey[key]) byKey[key] = { providers: {}, essential: false };
+        byKey[key].providers[pl.provider] = 1;
+        if (pl.link.dependency_strength >= ESSENTIAL_STRENGTH) byKey[key].essential = true;
+      });
+      needs[id] = byKey;
+    });
+    return needs;
+  }
+
+  /* Sole-source cascade. Remove the node; a dependent is affected only when it loses its LAST
+     provider of some resource it needs at essential strength (iterated to a fixpoint). A backup
+     relay therefore has a blast radius of 0 while the primary is up, which is what "would be
+     affected by its loss" has to mean for the sentence to be true.
+     Returns { count, affected[] } per node. */
+  function soleSourceCascade(ids, needs, dependentsDistinct) {
+    var result = {};
+    ids.forEach(function (id) {
+      var removed = {};
+      removed[id] = 1;
+      var frontier = [id];
+      var affected = [];
+      while (frontier.length) {
+        var next = [];
+        frontier.forEach(function (gone) {
+          dependentsDistinct[gone].forEach(function (dep) {
+            if (removed[dep]) return;
+            var byKey = needs[dep];
+            var starved = Object.keys(byKey).some(function (key) {
+              var need = byKey[key];
+              if (!need.essential || !need.providers[gone]) return false;
+              return Object.keys(need.providers).every(function (p) { return removed[p]; });
+            });
+            if (starved) { removed[dep] = 1; affected.push(dep); next.push(dep); }
+          });
+        });
+        frontier = next;
+      }
+      affected.sort();
+      result[id] = { count: affected.length, affected: affected };
+    });
+    return result;
+  }
+
+  /* Plain reachability over dependentsOf — everything that sits downstream at all, whether or
+     not it has alternates. Kept for the inspector's "reachable downstream" line. */
+  function reachableDownstream(ids, dependentsDistinct) {
     var result = {};
     ids.forEach(function (id) {
       var seen = {};
@@ -209,7 +288,9 @@
       sentences.push('No single factor dominates; the score reflects moderate mission value and local connectivity.');
     }
     if (m.cascade_blast_radius > 0) {
-      sentences.push(m.cascade_blast_radius + ' downstream node' + (m.cascade_blast_radius === 1 ? '' : 's') + ' would be affected by its loss.');
+      sentences.push(m.cascade_blast_radius + ' downstream node' + (m.cascade_blast_radius === 1 ? '' : 's') + ' would lose ' + (m.cascade_blast_radius === 1 ? 'its' : 'their') + ' only source of an input if it were lost.');
+    } else if (m.reachable_downstream > 0) {
+      sentences.push(m.reachable_downstream + ' node' + (m.reachable_downstream === 1 ? ' sits' : 's sit') + ' downstream, all with an alternate source.');
     } else {
       sentences.push('No downstream systems depend on it.');
     }
@@ -225,17 +306,17 @@
     var weights = model.weights;
 
     var ids = graph.nodes.map(function (n) { return n.id; }).sort();
-    var neighbors = buildUndirectedNeighbors(graph, ids);
+    var links = metricLinks(graph);
+    var neighbors = buildUndirectedNeighbors(links, ids);
 
     var inCount = {};
     var outCount = {};
     var failureValues = {};
     ids.forEach(function (id) { inCount[id] = 0; outCount[id] = 0; failureValues[id] = []; });
-    graph.links.forEach(function (l) {
+    links.forEach(function (l) {
       outCount[l.source] += 1;
       inCount[l.target] += 1;
-      failureValues[l.source].push(l.failure_impact);
-      failureValues[l.target].push(l.failure_impact);
+      failureOwners(l).forEach(function (id) { failureValues[id].push(l.failure_impact); });
       if (l.direction === 'bidirectional') {
         outCount[l.target] += 1;
         inCount[l.source] += 1;
@@ -249,7 +330,9 @@
       dependentsDistinct[id] = distinctSorted(graph.dependentsOf[id]);
     });
 
-    var cascade = cascadeBlastRadius(ids, dependentsDistinct);
+    var needs = buildNeeds(graph, ids);
+    var cascade = soleSourceCascade(ids, needs, dependentsDistinct);
+    var reachable = reachableDownstream(ids, dependentsDistinct);
     var betweennessSkipped = graph.nodes.length > model.betweenness_node_limit;
     var between = betweennessSkipped ? null : brandesBetweenness(ids, neighbors);
     var closeness = closenessCentrality(ids, neighbors);
@@ -274,14 +357,14 @@
       var sharedLoad = capNorm(Math.max(0, graph.dependentsOf[id].length - 1), caps.shared);
       var degreeComposite = (0.35 * capNorm(degree, caps.degree))
         + (0.45 * capNorm(depConcentration, caps.dependency))
-        + (0.20 * capNorm(cascade[id], caps.cascade));
+        + (0.20 * capNorm(cascade[id].count, caps.cascade));
       var betweenValue = between ? between[id] : null;
 
       var values = {
         mission: node.mission_importance / 5,
         echelon: node.echelon_importance / 5,
         degree: degreeComposite,
-        betweenness: (betweenValue === null) ? 0 : betweenValue,
+        betweenness: (betweenValue === null) ? 0 : capNorm(betweenValue, caps.betweenness || 1),
         failure: failureTop2 / 5,
         shared: sharedLoad
       };
@@ -300,7 +383,9 @@
         in_degree: inCount[id],
         out_degree: outCount[id],
         dependency_concentration: depConcentration,
-        cascade_blast_radius: cascade[id],
+        cascade_blast_radius: cascade[id].count,
+        cascade_affected: cascade[id].affected,
+        reachable_downstream: reachable[id],
         betweenness: betweenValue,
         closeness: closeness[id],
         failure_impact_top2: failureTop2,
@@ -313,17 +398,25 @@
       node.metrics.rationale = buildRationale(node, node.metrics, dependentsDistinct[id].length);
     });
 
-    var ranked = graph.nodes.map(function (n) { return n.id; });
-    ranked.sort(function (a, b) {
+    var rankedAll = graph.nodes.map(function (n) { return n.id; });
+    rankedAll.sort(function (a, b) {
       var diff = graph.nodesById[b].metrics.criticality_score - graph.nodesById[a].metrics.criticality_score;
       if (diff !== 0) return diff;
       return (a < b) ? -1 : ((a > b) ? 1 : 0);
     });
+    /* The criticality table answers "what matters to us"; adversary nodes are scored (the
+       inspector still explains them) but never ranked among friendly assets. */
+    var ranked = rankedAll.filter(function (id) { return !isAdversary(graph.nodesById[id]); });
 
-    return { ranked: ranked, betweennessSkipped: betweennessSkipped, maxScore: maxScore };
+    return { ranked: ranked, rankedAll: rankedAll, betweennessSkipped: betweennessSkipped, maxScore: maxScore };
   }
 
+  function isAdversary(node) { return !!node && node.side === 'Enemy'; }
+
   OSP.metrics = {
-    computeMetrics: computeMetrics
+    computeMetrics: computeMetrics,
+    isAdversary: isAdversary,
+    MIN_NEED_STRENGTH: MIN_NEED_STRENGTH,
+    ESSENTIAL_STRENGTH: ESSENTIAL_STRENGTH
   };
 })();

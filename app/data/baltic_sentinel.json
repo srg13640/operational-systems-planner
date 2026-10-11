@@ -1,6 +1,6 @@
 {
   "kind": "osp-scenario",
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "meta": {
     "id": "osp-demo-baltic-sentinel",
     "name": "Operation BALTIC SENTINEL",
@@ -28,7 +28,12 @@
       "marking": "UNCLASSIFIED",
       "banner_caveat": "NOTIONAL - FICTIONAL DATA",
       "prototype": true
-    }
+    },
+    "mission_statement": "MN Corps NORTHEAST defends the eastern flank and sustains a multinational division through a Phase I rail-corridor cut and Phase II coastal-LOC degradation that converge corps sustainment onto the Gdynia port terminal.",
+    "purpose": "Demonstration architecture: a logistics-weighted counterpart to PACIFIC SENTINEL showing performer-level needlines (OV-2) driven by materiel rather than information flow, and the task organization (OV-4) that owns them.",
+    "architect": "OSP demo authoring (synthetic)",
+    "version": "1.2",
+    "as_of": "2026-07-04"
   },
   "timeline": {
     "duration_hours": 96,
@@ -64,6 +69,7 @@
       "id": "corps-main",
       "name": "MN Corps NORTHEAST Main Command Post",
       "node_type": "command_post",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Corps",
@@ -77,7 +83,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST",
       "vulnerability_notes": "Main CP, COP servers, and the SATCOM gateway draw on the same host-nation power grid segment.",
       "tags": [
@@ -103,6 +109,7 @@
       "id": "div-hq",
       "name": "MN Division NORTH Headquarters",
       "node_type": "headquarters",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Division",
@@ -116,7 +123,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Division NORTH",
       "vulnerability_notes": "",
       "tags": [
@@ -135,12 +142,14 @@
         "echelon_mark": "XX",
         "hq": true,
         "cp": ""
-      }
+      },
+      "parent_relationship": "opcon"
     },
     {
       "id": "div-tac",
       "name": "MN Division NORTH Tactical Command Post",
       "node_type": "command_post",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Division",
@@ -154,7 +163,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Division NORTH",
       "vulnerability_notes": "",
       "tags": [
@@ -174,12 +183,14 @@
         "echelon_mark": "XX",
         "hq": true,
         "cp": "TAC"
-      }
+      },
+      "parent_relationship": "opcon"
     },
     {
       "id": "fires-cell",
       "name": "Corps Fires Cell",
       "node_type": "directorate",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Corps",
@@ -193,7 +204,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST FSE",
       "vulnerability_notes": "",
       "tags": [
@@ -212,12 +223,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "sust-bde",
       "name": "87th Corps Sustainment Brigade HQ",
       "node_type": "headquarters",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -231,7 +244,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "87th Sustainment Brigade",
       "vulnerability_notes": "",
       "tags": [
@@ -250,12 +263,14 @@
         "echelon_mark": "X",
         "hq": true,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "himars-bn",
       "name": "1-77 Field Artillery (HIMARS)",
       "node_type": "shooter",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battalion",
@@ -269,7 +284,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST FSE",
       "vulnerability_notes": "Rocket resupply single-threads through the Gdynia terminal once the rail corridor is cut at H+36.",
       "tags": [
@@ -289,12 +304,14 @@
         "echelon_mark": "II",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "attached"
     },
     {
       "id": "gbad-bn",
       "name": "2-43 ADA Battalion (GBAD)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battalion",
@@ -308,7 +325,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST",
       "vulnerability_notes": "Interceptor reloads arrive by sea; magazine depth is measured in days under sustained SRBM salvos.",
       "tags": [
@@ -327,12 +344,14 @@
         "echelon_mark": "II",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "attached"
     },
     {
       "id": "ew-co",
       "name": "Corps EW Company",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Company",
@@ -346,7 +365,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST G3",
       "vulnerability_notes": "",
       "tags": [
@@ -365,12 +384,14 @@
         "echelon_mark": "I",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "assigned"
     },
     {
       "id": "cyber-cell",
       "name": "Corps Cyber Effects Planning Cell",
       "node_type": "office",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Corps",
@@ -384,7 +405,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST G3",
       "vulnerability_notes": "",
       "tags": [
@@ -403,12 +424,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "assigned"
     },
     {
       "id": "sof-det",
       "name": "SOF Reconnaissance Detachment NORTH",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Detachment",
@@ -422,7 +445,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "SOF Component (notional)",
       "vulnerability_notes": "",
       "tags": [
@@ -441,12 +464,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "supporting"
     },
     {
       "id": "awacs-orbit",
       "name": "NATO AEW&C Orbit BALTIC GUARDIAN",
       "node_type": "platform",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "NATO",
       "echelon": "Theater",
@@ -460,7 +485,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "NATO AEW&C Force (notional)",
       "vulnerability_notes": "Enclave long-range SAM coverage pushes the orbit west in Phase II, thinning radar coverage over the corridor.",
       "tags": [
@@ -485,6 +510,7 @@
       "id": "spod-gdynia",
       "name": "Seaport of Debarkation GDYNIA",
       "node_type": "facility",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -498,7 +524,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater JLSG (notional)",
       "vulnerability_notes": "Deep-draft berths and heavy cranes are concentrated on two quays — the port-throughput chokepoint open-source Baltic logistics studies flag.",
       "tags": [
@@ -524,6 +550,7 @@
       "id": "port-log",
       "name": "Port Logistics Terminal GDYNIA",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -537,7 +564,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "87th Sustainment Brigade SPO",
       "vulnerability_notes": "Becomes the sole feed for division sustainment, ammunition, and interceptor reloads once the rail corridor is cut (H+36) and the coastal LOC degrades under GPS jamming — a Phase II single point of failure that does not exist in Phase I.",
       "tags": [
@@ -557,12 +584,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "apod-powidz",
       "name": "Airfield Logistics Node POWIDZ (APOD)",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Air Force",
       "echelon": "Theater",
@@ -578,7 +607,7 @@
       "status_by_phase": {
         "p2": "Degraded"
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater JLSG (notional)",
       "vulnerability_notes": "Single large ramp and fuel farm — the airfield-concentration problem that makes APODs the first SRBM aimpoints.",
       "tags": [
@@ -604,6 +633,7 @@
       "id": "rail-yard",
       "name": "Rail Gauge-Break Yard MOCKAVA",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -620,7 +650,7 @@
         "p2": "Offline",
         "p3": "Degraded"
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "Host-nation rail authority (notional)",
       "vulnerability_notes": "Fixed cranes and limited transload sidings cap corridor rail throughput — the gauge-break bottleneck every open-source Baltic mobility study flags.",
       "tags": [
@@ -646,6 +676,7 @@
       "id": "coastal-corridor",
       "name": "Coastal Road-Rail Corridor SIAULIAI",
       "node_type": "facility",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -662,7 +693,7 @@
         "p2": "Degraded",
         "p3": "Degraded"
       },
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "Host-nation movement control (notional)",
       "vulnerability_notes": "Convoy navigation and movement-tracking on the corridor depend on GPS; persistent enclave jamming plus interdiction strikes cut effective throughput in half after H+36.",
       "tags": [
@@ -688,6 +719,7 @@
       "id": "prepo-site",
       "name": "Prepositioned Stocks Site ODER",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Theater",
@@ -701,7 +733,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater AFSB (notional)",
       "vulnerability_notes": "Draw rate is gated by the LOCs east: rail through Mockava in Phase I, coastal sealift into Gdynia after the corridor is cut.",
       "tags": [
@@ -726,6 +758,7 @@
       "id": "atp-suwalki",
       "name": "Ammunition Transfer Point SUWALKI",
       "node_type": "logistics_node",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Company",
@@ -739,7 +772,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "87th Sustainment Brigade",
       "vulnerability_notes": "",
       "tags": [
@@ -758,12 +791,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "dsb",
       "name": "MN Division NORTH Sustainment Battalion",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Battalion",
@@ -777,7 +812,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Division NORTH",
       "vulnerability_notes": "Fed by two ground LOCs plus the port in Phase I; single-threaded through the Gdynia terminal after H+36.",
       "tags": [
@@ -796,12 +831,14 @@
         "echelon_mark": "II",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "opcon"
     },
     {
       "id": "eng-bn",
       "name": "52nd Engineer Battalion (Rail Repair)",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Battalion",
@@ -815,7 +852,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST G4",
       "vulnerability_notes": "",
       "tags": [
@@ -834,12 +871,14 @@
         "echelon_mark": "II",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "attached"
     },
     {
       "id": "satcom-gw",
       "name": "Corps SATCOM Gateway BALTIC",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -853,7 +892,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST G6",
       "vulnerability_notes": "Mission command, fires, and sustainment data all concentrate on this single gateway path; enclave uplink jamming squeezes it from Phase I.",
       "tags": [
@@ -873,12 +912,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "sat-natosat-a",
       "name": "NATO SATCOM IV-A (Wideband)",
       "node_type": "satellite",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "NATO",
       "echelon": "Strategic",
@@ -892,7 +933,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "NATO CIS Agency (notional)",
       "vulnerability_notes": "",
       "tags": [
@@ -917,6 +958,7 @@
       "id": "sat-comka-b",
       "name": "Commercial Ka-band GEO BALTICSAT-2",
       "node_type": "satellite",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Commercial",
       "echelon": "Strategic",
@@ -930,7 +972,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Commercial operator (leased, notional)",
       "vulnerability_notes": "",
       "tags": [
@@ -956,6 +998,7 @@
       "id": "gs-nordic",
       "name": "Ground Station NORDIC",
       "node_type": "ground_station",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -969,7 +1012,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater CIS Group (notional)",
       "vulnerability_notes": "All corps wideband reach-back lands at this single teleport — a standing comms concentration in every phase.",
       "tags": [
@@ -994,6 +1037,7 @@
       "id": "cable-landing",
       "name": "Undersea Cable Landing KOLOBRZEG",
       "node_type": "facility",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -1010,7 +1054,7 @@
         "p2": "Degraded",
         "p3": "Degraded"
       },
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater J6 (leased commercial trunk)",
       "vulnerability_notes": "Baltic subsea infrastructure incidents 2023-2025 are the open-source theme: a single trunk with no diverse path and hostile subsurface activity around it.",
       "tags": [
@@ -1036,6 +1080,7 @@
       "id": "theater-net",
       "name": "Theater Network Node RAMSTEIN",
       "node_type": "network",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Joint",
       "echelon": "Theater",
@@ -1049,7 +1094,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "Theater CIS Group (notional)",
       "vulnerability_notes": "",
       "tags": [
@@ -1074,6 +1119,7 @@
       "id": "mcp-sys",
       "name": "Mission Command Platform (Corps COP)",
       "node_type": "application",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Corps",
@@ -1087,7 +1133,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST G3/G6",
       "vulnerability_notes": "",
       "tags": [
@@ -1107,12 +1153,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "log-data-sys",
       "name": "Logistics Data System",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -1126,7 +1174,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "87th Sustainment Brigade SPO",
       "vulnerability_notes": "Precision-logistics scheduling assumes GPS-disciplined timing and tracking; enclave jamming forces fallback to manual batch reporting.",
       "tags": [
@@ -1145,12 +1193,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "sust-c2-sys",
       "name": "Sustainment C2 System",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Brigade",
@@ -1164,7 +1214,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "owner": "87th Sustainment Brigade SPO",
       "vulnerability_notes": "",
       "tags": [
@@ -1183,12 +1233,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "intel-db",
       "name": "Corps Intelligence Database",
       "node_type": "database",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Multinational",
       "echelon": "Corps",
@@ -1202,7 +1254,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST G2",
       "vulnerability_notes": "",
       "tags": [
@@ -1221,12 +1273,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "fires-data-sys",
       "name": "Fires Data System",
       "node_type": "system",
+      "arch_class": "system",
       "side": "Friendly",
       "service": "Army",
       "echelon": "Corps",
@@ -1240,7 +1294,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "MN Corps NORTHEAST FSE",
       "vulnerability_notes": "Depends on GPS-derived timing; enclave jamming slows Phase II counter-fire processing.",
       "tags": [
@@ -1260,12 +1314,14 @@
         "echelon_mark": "",
         "hq": false,
         "cp": ""
-      }
+      },
+      "parent_relationship": "organic"
     },
     {
       "id": "opfor-iads",
       "name": "OPFOR Enclave IADS Complex",
       "node_type": "system",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Operational",
@@ -1279,7 +1335,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
@@ -1304,6 +1360,7 @@
       "id": "opfor-srbm",
       "name": "OPFOR SRBM Brigade",
       "node_type": "shooter",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Brigade",
@@ -1317,7 +1374,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
@@ -1343,6 +1400,7 @@
       "id": "opfor-sag",
       "name": "OPFOR Baltic Surface Action Group",
       "node_type": "platform",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Squadron",
@@ -1356,7 +1414,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
@@ -1382,6 +1440,7 @@
       "id": "opfor-ew",
       "name": "OPFOR EW/Jamming Regiment",
       "node_type": "unit",
+      "arch_class": "performer",
       "side": "Enemy",
       "service": "OPFOR",
       "echelon": "Regiment",
@@ -1395,7 +1454,7 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "owner": "OPFOR",
       "vulnerability_notes": "",
       "tags": [
@@ -1436,9 +1495,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Corps command relationship with the forward multinational division."
+      "notes": "Corps command relationship with the forward multinational division.",
+      "link_class": "org"
     },
     {
       "id": "l-cmd-tac",
@@ -1457,9 +1517,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Division TAC assumes control of the corridor close fight in Phase II."
+      "notes": "Division TAC assumes control of the corridor close fight in Phase II.",
+      "link_class": "org"
     },
     {
       "id": "l-cmd-sust",
@@ -1478,9 +1539,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-fires-himars",
@@ -1499,9 +1561,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-div-dsb",
@@ -1520,9 +1583,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-corps-gbad",
@@ -1541,9 +1605,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-corps-ew",
@@ -1562,9 +1627,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-corps-sof",
@@ -1583,9 +1649,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "SOF detachment reach-back rides narrowband SATCOM, independent of the corps gateway."
+      "notes": "SOF detachment reach-back rides narrowband SATCOM, independent of the corps gateway.",
+      "link_class": "org"
     },
     {
       "id": "l-sust-eng",
@@ -1604,9 +1671,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "org"
     },
     {
       "id": "l-main-hosts-mcp",
@@ -1625,9 +1693,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "COP server stack is hosted in the Main CP on shared host-nation power."
+      "notes": "COP server stack is hosted in the Main CP on shared host-nation power.",
+      "link_class": "flow",
+      "resource": "Hosting (power, LAN, admin)",
+      "resource_kind": "other",
+      "protocol": "LAN"
     },
     {
       "id": "l-mcp-gw",
@@ -1646,9 +1718,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Primary reach-back transport for the corps common operational picture in all phases."
+      "notes": "Primary reach-back transport for the corps common operational picture in all phases.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-intel-mcp",
@@ -1667,9 +1743,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Intelligence picture",
+      "resource_kind": "information",
+      "protocol": "DB replication"
     },
     {
       "id": "l-log-mcp",
@@ -1688,9 +1768,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "CUI logistics status feed crosses a classification boundary into the SECRET COP through a one-way guard."
+      "notes": "CUI logistics status feed crosses a classification boundary into the SECRET COP through a one-way guard.",
+      "link_class": "flow",
+      "resource": "Logistics status",
+      "resource_kind": "information",
+      "protocol": "REST API"
     },
     {
       "id": "l-fires-uses-fd",
@@ -1709,9 +1793,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "dependency",
+      "resource": "Fire mission processing",
+      "resource_kind": "information",
+      "protocol": "LAN"
     },
     {
       "id": "l-fd-himars",
@@ -1730,9 +1818,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Fire mission and technical fire direction data to the HIMARS battalion."
+      "notes": "Fire mission and technical fire direction data to the HIMARS battalion.",
+      "link_class": "flow",
+      "resource": "Fire missions",
+      "resource_kind": "information",
+      "protocol": "VMF / AFATDS"
     },
     {
       "id": "l-intel-fd",
@@ -1751,9 +1843,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Target intelligence and battle damage assessment feed the counter-fire chain."
+      "notes": "Target intelligence and battle damage assessment feed the counter-fire chain.",
+      "link_class": "flow",
+      "resource": "Targeting data",
+      "resource_kind": "information",
+      "protocol": "REST API"
     },
     {
       "id": "l-sof-intel",
@@ -1772,9 +1868,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Special reconnaissance reporting on OPFOR SRBM movement along the corridor flank."
+      "notes": "Special reconnaissance reporting on OPFOR SRBM movement along the corridor flank.",
+      "link_class": "flow",
+      "resource": "SOF reconnaissance reports",
+      "resource_kind": "information",
+      "protocol": "SATCOM"
     },
     {
       "id": "l-awacs-intel",
@@ -1793,9 +1893,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Recognized air picture and track data from the AEW&C orbit."
+      "notes": "Recognized air picture and track data from the AEW&C orbit.",
+      "link_class": "flow",
+      "resource": "Air picture",
+      "resource_kind": "information",
+      "protocol": "Link 16"
     },
     {
       "id": "l-awacs-gbad",
@@ -1814,16 +1918,20 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Early-warning cueing for port and CP air defense — orbit displacement in Phase II lengthens warning time."
+      "notes": "Early-warning cueing for port and CP air defense — orbit displacement in Phase II lengthens warning time.",
+      "link_class": "flow",
+      "resource": "Air picture",
+      "resource_kind": "information",
+      "protocol": "Link 16"
     },
     {
       "id": "l-hf-fallback",
       "source": "div-tac",
       "target": "himars-bn",
-      "relationship_type": "communicates_with",
-      "direction": "bidirectional",
+      "relationship_type": "provides_data_to",
+      "direction": "directed",
       "communication_method": "UHF/VHF/HF Radio",
       "bandwidth": "",
       "latency": "",
@@ -1835,9 +1943,14 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Legacy HF fallback net awaiting multinational crypto fill — currently passes SECRET traffic unencrypted."
+      "notes": "Voice/data fallback for fire missions when the fires data path is down; slower, lower capacity.",
+      "link_class": "flow",
+      "name": "HF fallback fire-mission net",
+      "resource": "Fire missions",
+      "resource_kind": "information",
+      "protocol": "HF voice/data"
     },
     {
       "id": "l-gw-sata",
@@ -1856,9 +1969,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Primary wideband uplink."
+      "notes": "Primary wideband uplink.",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-gw-satb",
@@ -1877,9 +1994,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Leased commercial Ka-band alternate uplink."
+      "notes": "Leased commercial Ka-band alternate uplink.",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-gs-sata",
@@ -1898,9 +2019,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-gs-satb",
@@ -1919,9 +2044,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "SATCOM transponder capacity",
+      "resource_kind": "information",
+      "protocol": "Ka/X-band"
     },
     {
       "id": "l-gw-gs",
@@ -1940,9 +2069,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "All corps wideband traffic lands at the NORDIC teleport — a standing comms concentration in every phase."
+      "notes": "All corps wideband traffic lands at the NORDIC teleport — a standing comms concentration in every phase.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-gs-theater",
@@ -1961,9 +2094,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Teleport-to-theater terrestrial segment — no diverse terrestrial route north of Oslo."
+      "notes": "Teleport-to-theater terrestrial segment — no diverse terrestrial route north of Oslo.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-mcp-cable",
@@ -1982,9 +2119,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Bulk COP and intelligence replication rides the Baltic trunk; degraded after the H+40 subsea incident."
+      "notes": "Bulk COP and intelligence replication rides the Baltic trunk; degraded after the H+40 subsea incident.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-cable-theater",
@@ -2003,9 +2144,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Single Baltic undersea trunk with no diverse path — the 2023-2025 subsea-incident theme; damaged at H+40."
+      "notes": "Single Baltic undersea trunk with no diverse path — the 2023-2025 subsea-incident theme; damaged at H+40.",
+      "link_class": "flow",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-sustc2-gw",
@@ -2024,9 +2169,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Sustainment C2 reach-back rides the corps gateway — logistics data joins the comms concentration."
+      "notes": "Sustainment C2 reach-back rides the corps gateway — logistics data joins the comms concentration.",
+      "link_class": "dependency",
+      "resource": "Theater reach-back",
+      "resource_kind": "information",
+      "protocol": "IP/SATCOM"
     },
     {
       "id": "l-sust-uses-c2",
@@ -2045,9 +2194,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "dependency",
+      "resource": "Sustainment C2 access",
+      "resource_kind": "information",
+      "protocol": "LAN"
     },
     {
       "id": "l-log-sustc2",
@@ -2066,9 +2219,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "flow",
+      "resource": "Logistics status",
+      "resource_kind": "information",
+      "protocol": "REST API"
     },
     {
       "id": "l-portlog-log",
@@ -2087,9 +2244,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Port throughput and vessel discharge status feed."
+      "notes": "Port throughput and vessel discharge status feed.",
+      "link_class": "flow",
+      "resource": "Port throughput status",
+      "resource_kind": "information",
+      "protocol": "IP/WAN"
     },
     {
       "id": "l-yard-courier",
@@ -2108,9 +2269,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Gauge-break transload status hand-carried daily to the sustainment COP — manual reporting gate with roughly 12-hour latency."
+      "notes": "Gauge-break transload status hand-carried daily to the sustainment COP — manual reporting gate with roughly 12-hour latency.",
+      "link_class": "flow",
+      "resource": "Transload status",
+      "resource_kind": "information",
+      "protocol": "Courier"
     },
     {
       "id": "l-rail-prepo-yard",
@@ -2131,11 +2296,15 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [
         "rail-loc"
       ],
-      "notes": "Prepo draw moves east by standard-gauge rail to the Mockava transload; corridor bridges are struck and the line cut at H+36."
+      "notes": "Prepo draw moves east by standard-gauge rail to the Mockava transload; corridor bridges are struck and the line cut at H+36.",
+      "link_class": "flow",
+      "resource": "Corps sustainment (rail)",
+      "resource_kind": "materiel",
+      "protocol": "Rail"
     },
     {
       "id": "l-rail-yard-dsb",
@@ -2156,11 +2325,15 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [
         "rail-loc"
       ],
-      "notes": "Broad-gauge onward movement to the division rear; lost when the corridor is interdicted at H+36."
+      "notes": "Broad-gauge onward movement to the division rear; lost when the corridor is interdicted at H+36.",
+      "link_class": "flow",
+      "resource": "Class III/V",
+      "resource_kind": "materiel",
+      "protocol": "Rail"
     },
     {
       "id": "l-rail-yard-atp",
@@ -2181,11 +2354,15 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [
         "rail-loc"
       ],
-      "notes": "Class V by rail to the Suwalki ATP; lost when the corridor is interdicted at H+36."
+      "notes": "Class V by rail to the Suwalki ATP; lost when the corridor is interdicted at H+36.",
+      "link_class": "flow",
+      "resource": "Class V",
+      "resource_kind": "materiel",
+      "protocol": "Rail"
     },
     {
       "id": "l-port-coastal",
@@ -2204,9 +2381,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Onward movement north over the coastal road-rail LOC; residual throughput only after H+36 GPS jamming and strikes."
+      "notes": "Onward movement north over the coastal road-rail LOC; residual throughput only after H+36 GPS jamming and strikes.",
+      "link_class": "flow",
+      "resource": "Corps sustainment (road/rail)",
+      "resource_kind": "materiel",
+      "protocol": "Road/rail"
     },
     {
       "id": "l-coastal-dsb",
@@ -2225,9 +2406,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Coastal LOC convoy and rail deliveries into the division rear — GPS-dependent movement tracking."
+      "notes": "Coastal LOC convoy and rail deliveries into the division rear — GPS-dependent movement tracking.",
+      "link_class": "flow",
+      "resource": "Class III/V",
+      "resource_kind": "materiel",
+      "protocol": "Road/rail"
     },
     {
       "id": "l-spod-portlog",
@@ -2246,9 +2431,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Everything discharged at the Gdynia quays crosses the single logistics terminal."
+      "notes": "Everything discharged at the Gdynia quays crosses the single logistics terminal.",
+      "link_class": "flow",
+      "resource": "Corps sustainment (sealift)",
+      "resource_kind": "materiel",
+      "protocol": "Sealift"
     },
     {
       "id": "l-prepo-spod-p2",
@@ -2270,9 +2459,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Rail corridor cut — prepo draw diverted to coastal sealift into Gdynia."
+      "notes": "Rail corridor cut — prepo draw diverted to coastal sealift into Gdynia.",
+      "link_class": "flow",
+      "resource": "Prepositioned stocks",
+      "resource_kind": "materiel",
+      "protocol": "Rail/road"
     },
     {
       "id": "l-port-dsb-p2",
@@ -2294,9 +2487,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Corridor cut at H+36 — division sustainment single-threaded through the Gdynia terminal."
+      "notes": "Corridor cut at H+36 — division sustainment single-threaded through the Gdynia terminal.",
+      "link_class": "flow",
+      "resource": "Class III/V",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-port-atp-p2",
@@ -2318,9 +2515,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Ammunition throughput rerouted from the rail corridor through Gdynia after H+36."
+      "notes": "Ammunition throughput rerouted from the rail corridor through Gdynia after H+36.",
+      "link_class": "flow",
+      "resource": "Class V",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-port-gbad-p2",
@@ -2342,9 +2543,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Interceptor reloads arrive by sea and issue through the terminal — magazine depth rides on Gdynia."
+      "notes": "Interceptor reloads arrive by sea and issue through the terminal — magazine depth rides on Gdynia.",
+      "link_class": "flow",
+      "resource": "Class V (interceptors)",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-port-divtac-p2",
@@ -2366,9 +2571,13 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Forward staging packages for the division TAC move through the terminal once the corridor is cut."
+      "notes": "Forward staging packages for the division TAC move through the terminal once the corridor is cut.",
+      "link_class": "flow",
+      "resource": "Class I/III",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-atp-himars",
@@ -2387,9 +2596,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Class V rocket pods to the HIMARS battalion."
+      "notes": "Class V rocket pods to the HIMARS battalion.",
+      "link_class": "flow",
+      "resource": "Class V",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-dsb-divtac",
@@ -2408,9 +2621,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Division distribution to the TAC and corridor units."
+      "notes": "Division distribution to the TAC and corridor units.",
+      "link_class": "flow",
+      "resource": "Class I/III",
+      "resource_kind": "materiel",
+      "protocol": "Line haul"
     },
     {
       "id": "l-apod-divhq",
@@ -2429,9 +2646,13 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Time-sensitive Class VIII/IX by the Ramstein-Powidz airlift shuttle; ramp damage halves throughput in Phase II."
+      "notes": "Time-sensitive Class VIII/IX by the Ramstein-Powidz airlift shuttle; ramp damage halves throughput in Phase II.",
+      "link_class": "flow",
+      "resource": "Class I/III (airlift)",
+      "resource_kind": "materiel",
+      "protocol": "Airlift"
     },
     {
       "id": "l-gbad-port",
@@ -2450,9 +2671,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "GBAD coverage of the Gdynia complex — corps defended asset list serial 1 from H+36."
+      "notes": "GBAD coverage of the Gdynia complex — corps defended asset list serial 1 from H+36.",
+      "link_class": "effect"
     },
     {
       "id": "l-gbad-apod",
@@ -2471,9 +2693,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "A single battalion stretches to cover both the port complex and the Powidz ramp."
+      "notes": "A single battalion stretches to cover both the port complex and the Powidz ramp.",
+      "link_class": "effect"
     },
     {
       "id": "l-himars-iads",
@@ -2495,9 +2718,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Suppression of enclave air defense radars to open corridors for AEW&C and airlift."
+      "notes": "Suppression of enclave air defense radars to open corridors for AEW&C and airlift.",
+      "link_class": "effect"
     },
     {
       "id": "l-himars-srbm",
@@ -2519,9 +2743,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Counter-fire tasking: hold the SRBM brigade at risk to thin follow-on salvos."
+      "notes": "Counter-fire tasking: hold the SRBM brigade at risk to thin follow-on salvos.",
+      "link_class": "effect"
     },
     {
       "id": "l-ew-opforew",
@@ -2543,9 +2768,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Counter-jamming electronic attack against enclave GPS and uplink jammers."
+      "notes": "Counter-jamming electronic attack against enclave GPS and uplink jammers.",
+      "link_class": "effect"
     },
     {
       "id": "l-cyber-iads",
@@ -2567,9 +2793,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Offensive cyber effects against enclave IADS command and control, authorized H+8 to H+60."
+      "notes": "Offensive cyber effects against enclave IADS command and control, authorized H+8 to H+60.",
+      "link_class": "effect"
     },
     {
       "id": "l-sof-srbm",
@@ -2591,9 +2818,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Special reconnaissance maintains track custody of SRBM launcher movement."
+      "notes": "Special reconnaissance maintains track custody of SRBM launcher movement.",
+      "link_class": "effect"
     },
     {
       "id": "l-srbm-apod",
@@ -2614,9 +2842,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "SRBM salvo craters the Powidz ramp at H+38 — the airfield-concentration aimpoint."
+      "notes": "SRBM salvo craters the Powidz ramp at H+38 — the airfield-concentration aimpoint.",
+      "link_class": "effect"
     },
     {
       "id": "l-srbm-port",
@@ -2638,9 +2867,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "The terminal everything now moves through sits on the SRBM target deck — the Phase II convergence OPFOR is built to exploit."
+      "notes": "The terminal everything now moves through sits on the SRBM target deck — the Phase II convergence OPFOR is built to exploit.",
+      "link_class": "effect"
     },
     {
       "id": "l-srbm-yard",
@@ -2661,9 +2891,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Interdiction strikes on the corridor approach bridges cut the gauge-break line at H+36."
+      "notes": "Interdiction strikes on the corridor approach bridges cut the gauge-break line at H+36.",
+      "link_class": "effect"
     },
     {
       "id": "l-opforew-gw",
@@ -2685,9 +2916,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Uplink jamming from the enclave squeezes the corps wideband path."
+      "notes": "Uplink jamming from the enclave squeezes the corps wideband path.",
+      "link_class": "effect"
     },
     {
       "id": "l-opforew-coastal",
@@ -2709,9 +2941,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Persistent GPS jamming over the corridor degrades convoy navigation and precision-logistics tracking."
+      "notes": "Persistent GPS jamming over the corridor degrades convoy navigation and precision-logistics tracking.",
+      "link_class": "effect"
     },
     {
       "id": "l-sag-spod",
@@ -2732,9 +2965,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "The SAG threatens the sea approaches to Gdynia, forcing escorted convoys and slowing discharge."
+      "notes": "The SAG threatens the sea approaches to Gdynia, forcing escorted convoys and slowing discharge.",
+      "link_class": "effect"
     },
     {
       "id": "l-sag-cable",
@@ -2756,9 +2990,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Subsurface activity loiters near the Baltic trunk — the cable-incident pattern of 2023-2025."
+      "notes": "Subsurface activity loiters near the Baltic trunk — the cable-incident pattern of 2023-2025.",
+      "link_class": "effect"
     },
     {
       "id": "l-iads-awacs",
@@ -2779,9 +3014,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Long-range SAM coverage from the enclave pushes the AEW&C orbit west of the Vistula."
+      "notes": "Long-range SAM coverage from the enclave pushes the AEW&C orbit west of the Vistula.",
+      "link_class": "effect"
     },
     {
       "id": "l-iads-protects-srbm",
@@ -2800,9 +3036,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Enclave IADS umbrella covers the SRBM garrisons."
+      "notes": "Enclave IADS umbrella covers the SRBM garrisons.",
+      "link_class": "effect"
     },
     {
       "id": "l-iads-protects-ew",
@@ -2821,9 +3058,10 @@
       "phase_ids": "all",
       "status": "Active",
       "status_by_phase": {},
-      "classification": "SECRET",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": ""
+      "notes": "",
+      "link_class": "effect"
     },
     {
       "id": "l-eng-yard-p3",
@@ -2844,9 +3082,10 @@
       ],
       "status": "Active",
       "status_by_phase": {},
-      "classification": "CUI",
+      "classification": "UNCLASSIFIED",
       "tags": [],
-      "notes": "Bridge repair and yard restoration during consolidation returns the rail LOC to partial service."
+      "notes": "Bridge repair and yard restoration during consolidation returns the rail LOC to partial service.",
+      "link_class": "org"
     }
   ],
   "vulnerabilities": [

@@ -46,7 +46,9 @@
     var eff = active ? g.statusOf(n) : null;
     var m = active ? n.metrics : null;
 
+    var cls = OSP.model.archClassOf(n);
     var html = '<div class="inspHeader"><h2>' + escapeHtml(n.name) + '</h2><div class="subRow">' +
+      '<span class="tag arch-' + cls + '">' + escapeHtml(cls) + '</span>' +
       '<span class="tag">' + escapeHtml(n.node_type) + '</span>' +
       (n.echelon ? '<span class="tag">' + escapeHtml(n.echelon) + '</span>' : '') +
       '<span class="tag">' + escapeHtml(n.side) + '</span>' +
@@ -87,6 +89,8 @@
       kvRow('Classification', n.classification, true) +
       kvRow('Importance', 'mission ' + n.mission_importance + '/5 · echelon ' + n.echelon_importance + '/5') +
       '</dl></div>';
+
+    html += archSection(n, cls);
 
     // Relations
     var full = st.fullGraph;
@@ -130,13 +134,46 @@
     }
 
     html += '<div class="inspSection">' +
-      (OSP.geo.hasLatLon(n.geo) ? '<button class="inspBtn" data-act="show-map">Show on map</button>' : '') +
-      '<button class="inspBtn" data-act="show-graph">Show in graph</button>' +
+      (OSP.geo.hasLatLon(n.geo) ? '<button class="inspBtn" data-act="show-map">Show in OV-1</button>' : '') +
+      '<button class="inspBtn" data-act="show-graph">Show in ' + OSP.dodaf.viewDef(OSP.dodaf.graphViewForNode(n)).code + '</button>' +
       '<button class="inspBtn" data-act="isolate">' + (st.isolate ? 'Exit isolate' : 'Isolate 2-hop (I)') + '</button>' +
       '<button class="inspBtn" data-edit-act="edit-node" data-edit-id="' + escapeHtml(n.id) + '">Edit</button>' +
       '<button class="inspBtn" data-edit-act="add-link-from" data-edit-id="' + escapeHtml(n.id) + '">+ Link from here</button>' +
       '</div>';
     return html;
+  }
+
+  /* Where this entity appears across the architecture views, and (for performers) which
+     systems it owns / (for systems) which performer owns it. Reads the same repository the
+     views are derived from, so the inspector and the diagrams cannot disagree. */
+  function archSection(n, cls) {
+    var full = ctx.state.fullGraph;
+    var rows = '';
+    var owned = [], owner = n.parent_id ? full.nodesById[n.parent_id] : null;
+    (full.children[n.id] || []).forEach(function (id) {
+      var k = full.nodesById[id];
+      if (k && OSP.model.archClassOf(k) === 'system') owned.push(k);
+    });
+    if (cls === 'performer') {
+      rows += '<div style="font-size:11px; color:var(--fg-dim); margin-bottom:2px">Systems owned (SV-1 context)</div><div>' +
+        (owned.length ? owned.map(function (o) { return chip(o.name, { type: 'node', id: o.id }); }).join('')
+                      : '<span class="hint" style="color:var(--fg-dim)">none — set a system\'s parent to this performer</span>') + '</div>';
+    } else if (cls === 'system') {
+      var perf = owner;
+      while (perf && OSP.model.archClassOf(perf) !== 'performer') perf = perf.parent_id ? full.nodesById[perf.parent_id] : null;
+      rows += '<div style="font-size:11px; color:var(--fg-dim); margin-bottom:2px">Owning performer</div><div>' +
+        (perf ? chip(perf.name, { type: 'node', id: perf.id }) : '<span class="hint" style="color:var(--fg-dim)">none recorded</span>') + '</div>';
+    }
+    var appears = OSP.dodaf.VIEWS.filter(function (v) {
+      if (v.viewpoint === 'Analysis') return false;
+      if (v.id === 'ov1') return OSP.geo.hasLatLon(n.geo);
+      if (v.id === 'ov4') return cls === 'performer';
+      if (v.id === 'ov2') return cls === 'performer';
+      return cls === 'system';
+    }).map(function (v) { return v.code; });
+    return '<div class="inspSection"><h3>Architecture</h3>' +
+      '<dl class="kv">' + kvRow('Class', cls) + kvRow('Appears in', appears.length ? appears.join(', ') : 'analysis views only') + '</dl>' +
+      rows + '</div>';
   }
 
   function linkHtml(l) {
@@ -145,8 +182,14 @@
     var a = full.nodesById[l.source], b = full.nodesById[l.target];
     var activeNow = st.graph.links.some(function (x) { return x.id === l.id; });
     var eff = activeNow ? st.graph.statusOf(l) : null;
+    var ca = a ? OSP.model.archClassOf(a) : 'other', cb = b ? OSP.model.archClassOf(b) : 'other';
+    var kind = !OSP.dodaf.isFlowLink(l) ? (OSP.dodaf.isOrgLink(l) ? 'OV-4 relationship' : 'non-flow relationship')
+      : (ca === 'performer' && cb === 'performer') ? 'OV-2 needline'
+      : (ca === 'system' && cb === 'system') ? 'SV-1 interface'
+      : 'performer–system link';
     return '<div class="inspHeader"><h2>' + escapeHtml((a ? a.name : l.source) + ' → ' + (b ? b.name : l.target)) + '</h2>' +
-      '<div class="subRow"><span class="tag">' + escapeHtml(l.relationship_type) + '</span>' +
+      '<div class="subRow"><span class="tag arch-link">' + kind + '</span>' +
+      '<span class="tag">' + escapeHtml(l.relationship_type) + '</span>' +
       '<span class="tag">' + escapeHtml(l.communication_method) + '</span>' +
       (activeNow ? '<span class="tag" style="color:' + (eff === 'Active' ? 'var(--ok)' : 'var(--warn)') + '">' + eff + '</span>'
                  : '<span class="tag">inactive this phase</span>') +

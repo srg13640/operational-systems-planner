@@ -20,7 +20,7 @@ function check(name, cond, detail) {
   check('boot: zero console/window errors', app1.errors.length === 0, app1.errors.slice(0, 5).join(' | ') || 'clean');
 
   const OSP = app1.window.OSP;
-  check('modules present', !!(OSP && OSP.model && OSP.metrics && OSP.findings && OSP.layout && OSP.geo && OSP.io && OSP.symbols), '');
+  check('modules present', !!(OSP && OSP.model && OSP.metrics && OSP.findings && OSP.layout && OSP.geo && OSP.io && OSP.symbols && OSP.dodaf), '');
 
   const sc = OSP.state.scenario;
   check('demo scenario loaded', !!sc && sc.meta.name.indexOf('PACIFIC SENTINEL') >= 0, sc && sc.meta.name);
@@ -61,14 +61,86 @@ function check(name, cond, detail) {
   check('stack module present with export hook',
     !!(app1.window.OSP.renderStack && app1.window.OSP.renderStack.exportDraw && app1.window.OSP.renderStack.activeDomains().length >= 5),
     app1.window.OSP.renderStack ? app1.window.OSP.renderStack.activeDomains().join(',') : 'missing');
-  ['graph', 'stack', 'risk', 'map', 'stack', 'graph', 'risk', 'graph'].forEach(v => H.clickView(app1, v));
-  check('view switching A→B→A clean', app1.errors.length === before, app1.errors.slice(before).join(' | ') || 'clean');
+  const allViews = OSP.dodaf.VIEWS.map(v => v.id);
+  check('view registry: OV-1, OV-2, OV-4, SV-1, SV-2 plus three analysis views',
+    ['ov1', 'ov2', 'ov4', 'sv1', 'sv2', 'graph', 'stack', 'risk'].every(v => allViews.indexOf(v) >= 0), allViews.join(','));
+  check('view tabs generated from the registry',
+    app1.document.querySelectorAll('#viewTabs button').length === allViews.length &&
+    app1.document.querySelectorAll('#viewTabs .tabGroup').length === OSP.dodaf.GROUPS.length, '');
+  allViews.concat(['graph', 'stack', 'risk', 'ov1', 'stack', 'graph', 'risk', 'graph']).forEach(v => H.clickView(app1, v));
+  check('view switching A→B→A clean (all views)', app1.errors.length === before, app1.errors.slice(before).join(' | ') || 'clean');
   check('graph rendered nodes', app1.document.querySelectorAll('#gNodes g.node').length >= 30,
     String(app1.document.querySelectorAll('#gNodes g.node').length));
 
   const pos1 = H.graphNodePositions(app1);
   const minD = H.minPairDistance(pos1);
   check('no node overlap (min pair distance ≥ 50px)', minD >= 50, minD.toFixed(1) + 'px');
+
+  // ---- DoDAF views are filters over the one repository ----
+  const full = OSP.state.fullGraph;
+  const classOf = id => OSP.model.archClassOf(full.nodesById[id]);
+  const ov2 = OSP.dodaf.buildView('ov2', sc, full, { deriveNeedlines: true });
+  const sv1 = OSP.dodaf.buildView('sv1', sc, full, { svContext: false });
+  const ov4 = OSP.dodaf.buildView('ov4', sc, full, {});
+  check('OV-2 contains only performers', ov2.nodes.length > 0 && ov2.nodes.every(n => OSP.model.archClassOf(n) === 'performer'),
+    ov2.nodes.length + ' performers');
+  check('OV-2 needlines join performers only', ov2.links.every(l => classOf(l.source) === 'performer' && classOf(l.target) === 'performer'),
+    ov2.links.length + ' needlines');
+  const derived = ov2.links.filter(l => l.derived);
+  check('OV-2 derives needlines through systems (each records its via path)',
+    derived.length > 0 && derived.every(l => l.via && l.via.length >= 1 && l.via.every(id => classOf(id) === 'system')),
+    derived.length + ' derived');
+  const ov2NoDerive = OSP.dodaf.buildView('ov2', sc, full, { deriveNeedlines: false });
+  check('OV-2 without derivation has only direct needlines', ov2NoDerive.links.every(l => !l.derived) &&
+    ov2NoDerive.links.length === ov2.links.length - derived.length, ov2NoDerive.links.length + ' direct');
+  check('SV-1 contains only systems', sv1.nodes.length > 0 && sv1.nodes.every(n => OSP.model.archClassOf(n) === 'system'),
+    sv1.nodes.length + ' systems');
+  check('SV-1 interfaces join systems only', sv1.links.every(l => classOf(l.source) === 'system' && classOf(l.target) === 'system'),
+    sv1.links.length + ' interfaces');
+  check('OV-2 ∪ SV-1 partitions performers and systems (no entity in both)',
+    ov2.nodes.every(n => !sv1.nodesById[n.id]) && sv1.nodes.every(n => !ov2.nodesById[n.id]), '');
+  check('every SV-1 interface exists in the repository (views never invent data)',
+    sv1.links.every(l => full.links.some(x => x.id === l.id)), '');
+  check('OV-4 hierarchy edges derive from parent_id',
+    ov4.parentEdges.length > 0 && ov4.parentEdges.every(e => full.nodesById[e.child] && full.nodesById[e.child].parent_id === e.parent), ov4.parentEdges.length + ' edges');
+  check('OV-4 shows only org relationships', ov4.links.every(l => OSP.dodaf.isOrgLink(l)), ov4.links.length + ' org links');
+  check('view captions and hidden summaries are strings',
+    [ov2, sv1, ov4].every(v => typeof OSP.dodaf.caption(v) === 'string' && typeof OSP.dodaf.hiddenSummary(v) === 'string'), OSP.dodaf.caption(ov2));
+
+  // per-view pinned layouts: a pin on OV-2 does not move the node in SV-1 or the graph
+  H.clickView(app1, 'ov2');
+  const pinTarget = ov2.nodes[0].id;
+  OSP.model.viewPositions(OSP.state.scenario, 'ov2')[pinTarget] = { x: 123, y: 456, pinned: true };
+  OSP.renderGraph.invalidateLayout();
+  H.clickView(app1, 'ov2');
+  const ov2Pos = H.graphNodePositions(app1)[pinTarget];
+  H.clickView(app1, 'graph');
+  const graphPos = H.graphNodePositions(app1)[pinTarget];
+  check('per-view pinned layout: OV-2 pin applied on OV-2 only',
+    ov2Pos && Math.abs(ov2Pos.x - 123) < 0.5 && Math.abs(ov2Pos.y - 456) < 0.5 && graphPos && Math.abs(graphPos.x - pos1[pinTarget].x) < 0.5,
+    JSON.stringify(ov2Pos) + ' vs graph ' + JSON.stringify(graphPos));
+  delete OSP.model.viewPositions(OSP.state.scenario, 'ov2')[pinTarget];
+  OSP.renderGraph.invalidateLayout();
+  H.clickView(app1, 'graph');
+
+  // OV-1 concept mode: on-canvas title identifies the model; toggling the lens is clean
+  H.clickView(app1, 'ov1');
+  check('OV-1 title block rendered', app1.document.getElementById('viewTitleCode').textContent === 'OV-1' &&
+    app1.document.body.getAttribute('data-view') === 'map' && app1.document.body.getAttribute('data-model') === 'ov1', '');
+  const errLens = app1.errors.length;
+  const chkConcept = app1.document.getElementById('chkConcept');
+  chkConcept.checked = false; chkConcept.dispatchEvent(new app1.window.Event('change', { bubbles: true }));
+  chkConcept.checked = true; chkConcept.dispatchEvent(new app1.window.Event('change', { bubbles: true }));
+  H.clickView(app1, 'sv1');
+  const chkCtx = app1.document.getElementById('chkSvContext');
+  chkCtx.checked = true; chkCtx.dispatchEvent(new app1.window.Event('change', { bubbles: true }));
+  check('SV-1 with owning-performer context draws more nodes than systems alone',
+    app1.document.querySelectorAll('#gNodes g.node').length > sv1.nodes.length, String(app1.document.querySelectorAll('#gNodes g.node').length));
+  chkCtx.checked = false; chkCtx.dispatchEvent(new app1.window.Event('change', { bubbles: true }));
+  const chkLens = app1.document.getElementById('chkArchLens');
+  chkLens.checked = true; chkLens.dispatchEvent(new app1.window.Event('change', { bubbles: true }));
+  chkLens.checked = false; chkLens.dispatchEvent(new app1.window.Event('change', { bubbles: true }));
+  check('concept mode / context / lens toggles clean', app1.errors.length === errLens, app1.errors.slice(errLens).join(' | ') || 'clean');
 
   // ---- scrub while on risk view, check emergence tag ----
   H.clickView(app1, 'risk');
@@ -107,6 +179,26 @@ function check(name, cond, detail) {
     re.scenario.vulnerabilities.length === sc.vulnerabilities.length &&
     re.issues.filter(i => i.level === 'error').length === 0,
     re.scenario.nodes.length + ' nodes, ' + re.issues.length + ' issues');
+  check('schema 1.2: arch_class survives round-trip and export is stamped with the current schema',
+    re.scenario.schema_version === OSP.model.SCHEMA_VERSION && re.scenario.nodes.every((n, i) => n.arch_class === sc.nodes[i].arch_class) &&
+    OSP.model.ARCH_CLASSES.indexOf(re.scenario.nodes[0].arch_class) >= 0, re.scenario.schema_version);
+  check('schema 1.2: link_class and resource survive round-trip; metrics never serialize',
+    re.scenario.links.every((l, i) => l.link_class === sc.links[i].link_class && (l.resource || '') === (sc.links[i].resource || '')) &&
+    OSP.io.scenarioToJson(sc).indexOf('"metrics"') < 0,
+    re.scenario.links.filter(l => l.resource).length + ' links carry a named resource');
+  // a 1.0 file with no arch_class classifies from node_type
+  const legacy = JSON.parse(json); legacy.schema_version = '1.0'; legacy.nodes.forEach(n => { delete n.arch_class; });
+  const legacyNorm = OSP.model.normalizeScenario(legacy);
+  check('schema 1.0 import: arch_class defaults from node_type, no errors',
+    legacyNorm.issues.filter(i => i.level === 'error').length === 0 &&
+    legacyNorm.scenario.nodes.every(n => n.arch_class === (OSP.model.ARCH_CLASS_OF_NODE_TYPE[n.node_type] || 'other')),
+    legacyNorm.scenario.nodes.filter(n => n.arch_class === 'performer').length + ' performers / ' +
+    legacyNorm.scenario.nodes.filter(n => n.arch_class === 'system').length + ' systems');
+  const csv = OSP.io.exportCsvTables(sc)['nodes.csv'];
+  const csvBack = OSP.model.normalizeScenario(OSP.io.importCsv(csv, sc).raw).scenario;
+  check('CSV round-trip carries arch_class', csv.split(/\r?\n/)[0].indexOf('arch_class') >= 0 &&
+    csvBack.nodes.length === sc.nodes.length && csvBack.nodes.every((n, i) => n.arch_class === sc.nodes[i].arch_class),
+    csv.split(/\r?\n/)[0].slice(0, 60));
 
   // ---- stack view: land and maritime must sit at (nearly) the same altitude, not
   // stacked like the abstract domains — a coastline is one surface, not two layers ----

@@ -1,6 +1,53 @@
 # Architecture
 
-Updated: 2026-07-03
+Updated: 2026-09-15
+
+## One repository, many views (DoDAF alignment)
+
+OSP holds **one architecture repository** — the scenario: performers, systems, the relationships
+between them, geography, and time — and derives every screen from it. Since schema 1.1 the
+derived screens are organised as DoDAF-style architecture views plus the original analysis
+surfaces:
+
+| Tab | Model | What it selects from the repository | Layout |
+|---|---|---|---|
+| OV-1 | High-Level Operational Concept Graphic | Everything with a location, on the basemap; *concept mode* suppresses the analytic overlay | map |
+| OV-2 | Operational Resource Flow Description | `arch_class = performer` nodes and the flow links between them; **derived needlines** (dashed) where two performers exchange only through systems | network |
+| OV-4 | Organizational Relationships Chart | Performers; hierarchy from `parent_id`; `commands / controls / supports` links dotted over it | hierarchy |
+| SV-1 | Systems Interface Description | `arch_class = system` nodes and the links between them; optional owning-performer context | network |
+| SV-2 | Systems Resource Flow Description | SV-1 with every interface labelled by `communication_method` and `bandwidth` | network |
+| GRAPH / STACK / RISK | fit-for-purpose analysis views | the whole repository, with the criticality lens always on | as before |
+
+Rules that keep the views honest:
+
+- **A view never owns data.** `dodaf.js` is a pure module: `buildView(viewId, scenario, fullGraph,
+  opts)` filters entity classes and relationship classes, adds derived edges with an explicit
+  `via` path, and reports what it left out (`hidden`, `hiddenLinks`). The rail shows that
+  summary; nothing is dropped silently. OV-2 and SV-1 therefore cannot disagree.
+- **Classification is data, not inference at render time.** Every node carries `arch_class`
+  (`performer | system | location | other`). It defaults from `node_type`
+  (`ARCH_CLASS_OF_NODE_TYPE` in `model.js`) and is overridden per node where the type
+  misleads — a battery typed `shooter` for the STACK view is still an organisation in OV-2/OV-4;
+  a fibre landing typed `facility` is a system in SV-1. The editor exposes the field.
+- **Derived needlines are computed, never persisted.** OV-2 traces performer → system* →
+  performer paths through at most `MAX_DERIVED_HOPS` (2) system intermediates over flow links
+  (anything but `commands / controls / targets`). A derived needline is active at time *t* only
+  when every node on its path is; the inspector and hover label it `via …`. Switchable off.
+- **Per-view pinned layouts.** `layout.views[viewId].positions` holds pins for each view so the
+  same system can sit in one place on SV-1 and another on OV-2; `layout.graph_positions` remains
+  the dependency graph's pins. Architecture views get more layout room than the analysis graph
+  (`spacing` / `minSlotWidth` options on the pure layout functions) and wrap long labels.
+- **The analytic lens is optional on architecture views.** Criticality colour/size and
+  vulnerability chains are off by default on OV/SV models and on OV-1 in concept mode, so an
+  exported OV-2 reads as an operational concept, not a risk picture. One checkbox turns the lens
+  on; the dependency graph, stack and risk board always have it.
+- **Every frame identifies its model.** The model bar shows `CODE Title · caption`; PNG exports
+  stamp the same into the footer.
+
+Not yet modelled (candidates, in rough priority): OV-5a/b activity decomposition (would need an
+activity taxonomy the scenario does not carry), OV-3 / SV-6 exchange matrices (tabular export of
+OV-2 / SV-2 edges is a small step), SV-5a capability-to-system mapping, AV-1 overview from
+`meta`.
 
 ## Runtime constraints (non-negotiable)
 
@@ -29,15 +76,16 @@ app/
 ├── styles/
 │   └── main.css            all CSS incl. light/dark theme tokens
 ├── scripts/
-│   ├── model.js            schema constants, normalize/validate, graph build, phase logic
+│   ├── model.js            schema constants, normalize/validate, graph build, phase logic, arch_class
+│   ├── dodaf.js            architecture-view registry and filters (OV-1/OV-2/OV-4/SV-1/SV-2), derived needlines (pure)
 │   ├── metrics.js          criticality engine (pure functions)
 │   ├── findings.js         vulnerability rule engine (pure functions)
 │   ├── layout.js           deterministic hierarchy + force layout (pure functions)
 │   ├── io.js               JSON/CSV import-export, column aliases, download helpers
 │   ├── geo.js              lat/lon ↔ basemap-pixel projection, viewport transform
 │   ├── symbols.js          FM 1-02.2 unit symbol SVG table
-│   ├── render-graph.js     SVG graph view
-│   ├── render-map.js       canvas map view
+│   ├── render-graph.js     SVG renderer for every graph-surface view (OV-2, OV-4, SV-1, SV-2, dependency graph)
+│   ├── render-map.js       canvas map view (OV-1 with concept mode)
 │   ├── render-risk.js      risk board view
 │   ├── render-stack.js     multi-domain 3D stack (real WebGL via vendored Three.js)
 │   ├── editor.js           in-app editing: forms, add/delete, place-on-map, snapshot undo
@@ -77,7 +125,7 @@ app/
     └── measure.js          pass/fail smoke gate (exit code) — `npm run verify` runs both
 ```
 
-`model.js`, `metrics.js`, `findings.js`, `layout.js`, `geo.js`, `io.js` are pure modules
+`model.js`, `dodaf.js`, `metrics.js`, `findings.js`, `layout.js`, `geo.js`, `io.js` are pure modules
 (attach to `window.OSP.*`, no DOM access) so the jsdom harness can unit-test them directly.
 
 ### STACK view — real WebGL, and why
@@ -152,17 +200,21 @@ What was ported from the original prototype, technique-for-technique:
   their activity vectors all read from the same memoized id→world-position lookup, so an
   unplaced (no lat/lon) entity's sprite and its links never drift apart across builders.
 
-## Data contract — `osp-scenario` v1.0
+## Data contract — `osp-scenario` v1.1
 
 One file = one scenario. Canonical rules: **lat/lon is the only persisted geography** (screen/
 layout coordinates are derived or quarantined in `layout`); **computed analytics are never
 persisted** in the scenario body (only their input weights are); **one canonical node table**
 (activities and links reference it by id).
 
+1.0 → 1.1 is additive: `nodes[].arch_class` (defaults from `node_type` on import, so 1.0 files
+load unchanged and re-export as 1.1) and `layout.views` (per-view pins). The normalizer always
+stamps the current version.
+
 ```jsonc
 {
   "kind": "osp-scenario",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "meta": {
     "id": "…", "name": "…", "description": "…",
     "scenario_name": "…", "turn": "…", "side": "Friendly",
@@ -177,6 +229,7 @@ persisted** in the scenario body (only their input weights are); **one canonical
   "nodes": [ {
     "id": "…", "name": "…",
     "node_type": "unit|headquarters|command_post|system|platform|sensor|shooter|network|application|database|data_feed|satellite|ground_station|relay|person_role|process|location|facility|logistics_node|other",
+    "arch_class": "performer|system|location|other",  // DoDAF class; defaults from node_type, override per node
     "side": "Friendly|Enemy|Neutral|Unknown", "service": "…",
     "echelon": "…", "unit": "…", "parent_id": "…",
     "warfighting_function": "…", "domain": "space|air|ems|cyber|c2|strike|sustain|land|maritime|data|other",
@@ -226,8 +279,9 @@ persisted** in the scenario body (only their input weights are); **one canonical
   "notes": [ { "id": "…", "ts": "ISO", "kind": "decision|assumption|narrative|risk", "text": "…",
                "refs": [ { "type": "node|link|vulnerability|activity|phase", "id": "…" } ] } ],
   "layout": {                                        // disposable view state, excluded from brief exports
-    "graph_positions": { "nodeId": { "x": 0, "y": 0, "pinned": true } },
-    "view": "map", "t": 0, "map_viewport": { "x": 0, "y": 0, "k": 1 }
+    "graph_positions": { "nodeId": { "x": 0, "y": 0, "pinned": true } },   // dependency-graph pins
+    "views": { "ov2": { "positions": { "nodeId": { "x": 0, "y": 0, "pinned": true } } } }, // per-view pins
+    "view": "ov1", "t": 0, "map_viewport": { "x": 0, "y": 0, "k": 1 }
   }
 }
 ```
@@ -260,12 +314,15 @@ analyst-asserted vulnerabilities (CO-002 lesson). Thresholds live in one config 
 
 ## Rendering
 
-- **Graph** (`render-graph.js`): SVG. Hierarchy mode = deterministic tree placement; network
-  mode = ported `runToConvergence` force layout (synchronous kinetic-energy plateau — layout is
-  a pure function of the dataset; determinism gate ≤1px). Parallel-edge quadratic offsets,
-  criticality color lens with fixed 5-step ramp, vulnerability chain halos, 2-hop isolate,
-  4px click-vs-drag threshold.
-- **Map** (`render-map.js`): canvas 2D over a **global equirectangular world space**
+- **Graph surface** (`render-graph.js`): SVG, drawing whatever `OSP.dodaf.buildView` hands it.
+  Hierarchy mode = deterministic tree placement (OV-4 and the graph's hierarchy option; OV-4 adds
+  orthogonal tree connectors); network mode = ported `runToConvergence` force layout
+  (synchronous kinetic-energy plateau — layout is a pure function of the dataset; determinism
+  gate ≤1px). Performers draw as rounded boxes and systems as rectangles on architecture views;
+  the dependency graph keeps circles. Parallel-edge quadratic offsets, optional relationship
+  labels (always on for SV-2), criticality color lens with fixed 5-step ramp (opt-in on OV/SV),
+  vulnerability chain halos, 2-hop isolate, 4px click-vs-drag threshold, per-view pins.
+- **Map / OV-1** (`render-map.js`): canvas 2D over a **global equirectangular world space**
   (±180° lon, ±90° lat at 60 px/degree = 21600×10800 world px). The raster ships as a local
   three-level tile pyramid: the L0 world base is always loaded and drawn cover-fit (no
   letterbox, no reachable void — hard pan clamp); L1/L2 tiles load on demand for the visible
@@ -277,7 +334,9 @@ analyst-asserted vulnerabilities (CO-002 lesson). Thresholds live in one config 
   **MIL-STD-2525C symbols** via vendored milsymbol (`symbols.js` maps node_type/branch/side/
   echelon to letter SIDCs, every code validated against the library; cached per SIDC+size,
   size follows zoom). Pure software/data nodes keep criticality-colored circles so the analytic
-  signal stays visible; 2525-rendered nodes carry a criticality tick at score ≥ 50. A
+  signal stays visible; 2525-rendered nodes carry a criticality tick at score ≥ 50. In OV-1
+  **concept mode** (default) both analytic cues are suppressed and labels grow, so the frame reads
+  as an operational concept graphic; untick it to get the analytic map back. A
   deterministic screen-space declutter pass relaxes co-located markers apart (sorted-id order,
   no randomness — exports stay reproducible). Fallback chain when milsymbol is unavailable
   (headless tests): FM 1-02.2 canvas frames → circles. Activity markers and source→target
@@ -293,7 +352,9 @@ analyst-asserted vulnerabilities (CO-002 lesson). Thresholds live in one config 
 
 - **PNG**: full redraw from the data model onto an offscreen canvas at 2× (never a pixel copy
   of the live canvas — that approach mis-registered overlays and got FSP's export deleted).
-  Classification banner, scenario name, H+time, and timestamp burned into a header/footer strip.
+  Classification banner, model code and title (e.g. `OV-2 Operational Resource Flow
+  Description`), view caption, scenario name, H+time, and timestamp burned into a header/footer
+  strip; filename carries the model code.
 - **JSON**: canonical scenario (with optional `layout`), `schema_version` stamped, plus an
   `export` block carrying a criticality snapshot (`computed_at`, weights used) that is never
   read back as authority.
@@ -316,6 +377,9 @@ Gates and commands live in `docs/VERIFICATION.md`. Summary:
   no `console.log/debug` in shipped code.
 - **Headless smoke** (`node app/tests/measure.js`, jsdom dev-only): zero init/console errors,
   demo node/link counts exact, layout determinism ≤1px across two cold loads, node overlap 0,
-  all views switch clean, phase-aware finding fires at H+48 and not at H+0.
+  all eight views switch clean, phase-aware finding fires at H+48 and not at H+0, DoDAF view
+  invariants (OV-2 performers only with derived needlines carrying `via`; SV-1 systems only;
+  OV-2 ∪ SV-1 partitions the repository; OV-4 edges come from `parent_id`), per-view pins,
+  schema 1.0 → 1.1 defaulting and 1.1 round-trip through JSON and CSV.
 - **Manual browser pass**: primary workflow click path (documented in VERIFICATION.md),
   1280×720 projector legibility, export artifact opens and carries the banner.

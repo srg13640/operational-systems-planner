@@ -3,15 +3,19 @@
 [![CI](https://github.com/srg13640/operational-systems-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/srg13640/operational-systems-planner/actions/workflows/ci.yml)
 [![Live demo](https://img.shields.io/badge/demo-GitHub%20Pages-2ea44f)](https://srg13640.github.io/operational-systems-planner/)
 
-**Model a mission system as a dependency graph, place it in global geographic and temporal
-context, and see what breaks, where, and when — then export a briefable artifact.**
+**One architecture repository — performers, systems, relationships, geography, time — and the
+operational and systems views a staff needs derived from it, with an optional risk lens.**
 
-OSP is a planning aid for staff officers, analysts, and wargamers. One dataset drives four
-linked surfaces — an operational **map**, a system **graph**, a multi-domain 3D **stack**, and
-a **risk board** — under a shared timeline. Scrub the clock and the risk picture changes: a
-ground station that is merely busy at H+12 becomes a single point of failure at H+48 when the
-fiber trunk is cut. Every score is decomposable, every finding carries evidence / "so what" /
-mitigation in plain English, and every visual exports with its classification banner burned in.
+OSP is a planning aid for staff officers, analysts, and wargamers. One scenario file is the
+repository; the screens are DoDAF-style views over it — **OV-1** concept graphic, **OV-2**
+operational resource flows, **OV-4** organizational relationships, **SV-1 / SV-2** systems
+interfaces and resource flows — plus three fit-for-purpose analysis surfaces: the full
+dependency **graph**, a multi-domain 3D **stack**, and a **risk board**. Because every view is a
+filter over the same data, OV-2 and SV-1 cannot disagree. A shared timeline runs under all of
+them: scrub the clock and the risk picture changes — a ground station that is merely busy at
+H+12 becomes a single point of failure at H+48 when the fiber trunk is cut. Every score is
+decomposable, every finding carries evidence / "so what" / mitigation in plain English, and
+every visual exports with its model code and classification banner burned in.
 
 **[Try it live](https://srg13640.github.io/operational-systems-planner/)** — or clone and
 double-click `app/index.html`. No build, no server: the entire app — a global NASA Blue Marble
@@ -21,27 +25,53 @@ this repo's Pages deployment or hand-carry it to a closed network.
 
 ## The 60-second demo
 
-1. Open the app — the built-in **Operation PACIFIC SENTINEL** scenario loads on the map.
-2. Press `Space` (or drag the timeline) to **H+48**: Phase II begins — missile salvos strike
+1. Open the app — the built-in **Operation PACIFIC SENTINEL** scenario loads as an **OV-1**
+   concept graphic on the map.
+2. Press `2` for **OV-2**: the 24 performers and the needlines between them. Dashed needlines
+   are derived — two performers that only exchange through systems still need each other.
+   Press `4` for **SV-1**: the 16 systems and their interfaces. Same data, different view.
+3. Press `Space` (or drag the timeline) to **H+48**: Phase II begins — missile salvos strike
    the APODs, the undersea fiber trunk is cut, the backup relay degrades.
-3. Open **RISK**: a new SEV-5 finding is tagged `EMERGED AT H+48` — *Ground Station KILO is a
+4. Open **RISK**: a new SEV-5 finding is tagged `EMERGED AT H+48` — *Ground Station KILO is a
    single point of failure*. The LRPF kill chain and sustainment C2 now both route through it.
-4. Click the finding — the dependency chain highlights across the graph and the map; the
-   inspector shows the evidence, the plain-English "so what," the mitigation, and the
-   criticality score's component breakdown.
-5. Drag a criticality weight to test the finding's robustness, then **Export** a
-   banner-stamped PNG for the decision brief.
+5. Back on SV-1, tick **Criticality lens** — the same interface diagram now colours by
+   structural criticality and overlays the vulnerability chain. Untick it and the diagram is a
+   plain architecture description again. Then **Export** a banner-stamped PNG titled with the
+   model code for the decision brief.
 
-## Surfaces
+## Views
 
-- **MAP** — a fully global, fully offline NASA Blue Marble topo.bathy basemap (local
-  three-level tile pyramid; pan and zoom anywhere on Earth), MIL-STD-2525C symbology via
-  vendored milsymbol, phase-scoped zones and reference points, activities that appear and
-  expire with the scrub, deterministic marker declutter, per-phase caption line, and an
-  unplaced-entities tray — nothing is silently dropped.
-- **GRAPH** — network and hierarchy layouts with deterministic, reproducible positioning
-  (0.000px drift across loads — screenshots taken minutes apart match), criticality color
-  lens, vulnerability chain overlays, 2-hop isolate.
+**Operational viewpoint**
+
+- **OV-1 High-Level Operational Concept Graphic** — a fully global, fully offline NASA Blue
+  Marble topo.bathy basemap (local three-level tile pyramid; pan and zoom anywhere on Earth),
+  MIL-STD-2525C symbology via vendored milsymbol, phase-scoped zones and reference points,
+  activities that appear and expire with the scrub, deterministic marker declutter, per-phase
+  caption line, and an unplaced-entities tray — nothing is silently dropped. *Concept mode*
+  (default) suppresses the analytic overlay so the frame reads as a concept, not a risk map.
+- **OV-2 Operational Resource Flow Description** — performers only, with recorded needlines
+  solid and derived needlines (traced through up to two intermediate systems) dashed and
+  labelled `via …`.
+- **OV-4 Organizational Relationships Chart** — command hierarchy from `parent_id` with
+  orthogonal connectors; command, control, and support relationships dotted over it.
+
+**Systems viewpoint**
+
+- **SV-1 Systems Interface Description** — systems only and the interfaces between them;
+  optionally show each system's owning performer as dashed context.
+- **SV-2 Systems Resource Flow Description** — SV-1 with every interface labelled by its
+  communication means and capacity.
+
+Every entity carries an architecture class (`performer | system | location | other`) that
+defaults from its type and can be overridden in the editor; the rail on each view states what
+it shows and what it leaves out. Drag to pin an entity for that view only — pins are per view,
+so a system can sit in one place on SV-1 and another on OV-2.
+
+**Analysis (fit-for-purpose)**
+
+- **GRAPH** — the whole repository: network and hierarchy layouts with deterministic,
+  reproducible positioning (0.000px drift across loads — screenshots taken minutes apart
+  match), criticality color lens, vulnerability chain overlays, 2-hop isolate.
 - **STACK** — a multi-domain 3D stack, real WebGL via a locally vendored Three.js (no CDN):
   every domain in the scenario becomes a glowing translucent layer, nodes sit on their domain
   plane at their real geographic position as hand-drawn icon sprites, and cross-domain
@@ -88,14 +118,17 @@ Same engine, opposite sides of the planet — scenarios are not tied to any thea
 
 ```sh
 npm install        # jsdom, dev-only test runner — see "third-party assets" below for what ships to users
-npm run verify     # static gates (syntax, offline discipline) + 38-check headless smoke suite
+npm run verify     # static gates (syntax, offline discipline) + 58-check headless smoke suite
 ```
 
 CI runs the same pipeline on every push. Gates include: zero console errors on boot, pinned
 demo-data counts with zero validation issues, layout determinism ≤1px across cold loads, the
-phase-emergent finding firing at H+48 and not at H+12 (in both built-in scenarios), JSON
-round-trip losslessness, editor add/edit/undo integrity, and a graceful, error-free fallback
-for the WebGL stack view when no GPU context is available. See
+phase-emergent finding firing at H+48 and not at H+12 (in both built-in scenarios), the DoDAF
+view invariants (OV-2 holds only performers and SV-1 only systems, the two partition the
+repository, derived needlines record their path, OV-4 edges come from `parent_id`), per-view
+pinned layouts, schema 1.0 → 1.1 defaulting and JSON/CSV round-trip losslessness, editor
+add/edit/undo integrity, and a graceful, error-free fallback for the WebGL stack view when no
+GPU context is available. See
 [docs/VERIFICATION.md](docs/VERIFICATION.md) for the full gate history, including how the
 basemap tile pyramid and the Three.js file://-loading bootstrap were verified.
 
@@ -103,8 +136,9 @@ basemap tile pyramid and the Three.js file://-loading bootstrap were verified.
 
 - **Offline-capable is a feature, not a limitation.** The app never makes a runtime network
   call (CI enforces it). Host it on Pages, hand-carry it to a closed network — same folder.
-- **Structured data behind every visual.** One scenario contract (`docs/ARCHITECTURE.md`)
-  drives all three surfaces; lat/lon is the only persisted geography.
+- **One repository, many views.** One scenario contract (`docs/ARCHITECTURE.md`) drives every
+  view; a view is a filter, never a second copy of the data, so views cannot contradict each
+  other. Lat/lon is the only persisted geography.
 - **Deterministic by design.** Layout, findings, and declutter are pure functions of the
   data — briefing screenshots are reproducible pixel-for-pixel.
 - **Honest analytics.** Criticality is a structural estimate, not a simulation, and the UI

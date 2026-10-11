@@ -15,11 +15,13 @@
     name: ['name', 'node_name', 'system', 'system_name', 'unit_name', 'title'],
     title: ['title'],
     node_type: ['node_type', 'type', 'entity_type', 'category'],
+    arch_class: ['arch_class', 'architecture_class', 'dodaf_class', 'performer_or_system'],
     service: ['service', 'branch'],
     side: ['side', 'affiliation', 'force', 'blue_red', 'friendly_enemy'],
     echelon: ['echelon', 'level'],
     unit: ['unit', 'organization', 'org', 'owning_unit'],
     parent_id: ['parent_id', 'parent', 'superior_id', 'owning_unit_id', 'contains_in', 'reports_to'],
+    parent_relationship: ['parent_relationship', 'command_relationship', 'task_org_relationship', 'opcon_tacon'],
     warfighting_function: ['warfighting_function', 'wff', 'function', 'warfighting'],
     domain: ['domain', 'operational_domain'],
     mission: ['mission', 'purpose'],
@@ -44,6 +46,10 @@
     source: ['source', 'from', 'source_id', 'src'],
     target: ['target', 'to', 'target_id', 'dst', 'destination'],
     relationship_type: ['relationship_type', 'relationship', 'relation', 'link_type'],
+    link_class: ['link_class', 'linkclass', 'exchange_class'],
+    resource: ['resource', 'resource_name', 'information_element', 'exchange_name', 'ie', 'needline_name'],
+    resource_kind: ['resource_kind', 'resource_type', 'exchange_kind'],
+    protocol: ['protocol', 'protocol_stack'],
     direction: ['direction', 'directedness'],
     communication_method: ['communication_method', 'communication', 'comms', 'link_method', 'method'],
     bandwidth: ['bandwidth', 'capacity'],
@@ -63,16 +69,16 @@
     mitigation: ['mitigation', 'recommendation', 'recommended_mitigation']
   };
 
-  var NODE_CSV_FIELDS = ['id', 'name', 'node_type', 'side', 'service', 'echelon', 'unit',
-    'parent_id', 'warfighting_function', 'domain', 'mission', 'mission_importance',
+  var NODE_CSV_FIELDS = ['id', 'name', 'node_type', 'arch_class', 'side', 'service', 'echelon', 'unit',
+    'parent_id', 'parent_relationship', 'warfighting_function', 'domain', 'mission', 'mission_importance',
     'echelon_importance', 'phase_ids', 'status', 'status_by_phase', 'location_name',
     'lat', 'lon', 'branch_type', 'echelon_mark', 'hq', 'cp', 'classification', 'owner',
     'vulnerability_notes', 'tags', 'notes'];
 
-  var LINK_CSV_FIELDS = ['id', 'source', 'target', 'relationship_type', 'direction',
-    'communication_method', 'bandwidth', 'latency', 'resilience', 'encryption',
-    'dependency_strength', 'failure_impact', 'provenance', 'phase_ids', 'status',
-    'status_by_phase', 'classification', 'tags', 'notes'];
+  var LINK_CSV_FIELDS = ['id', 'source', 'target', 'relationship_type', 'link_class', 'resource',
+    'resource_kind', 'direction', 'communication_method', 'bandwidth', 'latency', 'protocol',
+    'resilience', 'encryption', 'dependency_strength', 'failure_impact', 'provenance', 'phase_ids',
+    'status', 'status_by_phase', 'classification', 'tags', 'notes'];
 
   var VULN_CSV_FIELDS = ['id', 'title', 'vulnerability_type', 'affected_node_ids',
     'affected_link_ids', 'severity', 'likelihood', 'detectability', 'operational_impact',
@@ -155,7 +161,7 @@
     var row = [];
     var cell = '';
     var quoted = false;
-    var s = str(text);
+    var s = str(text).replace(/^\uFEFF/, '');
     for (var i = 0; i < s.length; i++) {
       var ch = s.charAt(i);
       var next = s.charAt(i + 1);
@@ -189,16 +195,23 @@
     });
   }
 
-  /* Header-signature table detection (ported). Takes the header row (array). */
+  /* Header-signature table detection. Each table's signature columns are scored and the
+     strongest wins, so a nodes sheet with a "source" column (data source) is not mistaken
+     for links; links need both an endpoint pair and win only when they outscore. */
   function detectCsvType(headerRow) {
-    var keys = (Array.isArray(headerRow) ? headerRow : []).map(normKey);
-    function hasAny(list) {
-      return keys.some(function (k) { return list.indexOf(k) >= 0; });
+    var fields = (Array.isArray(headerRow) ? headerRow : []).map(mapColumn);
+    function count(list) {
+      return fields.filter(function (f) { return list.indexOf(f) >= 0; }).length;
     }
-    if (hasAny(['source', 'from', 'target', 'to', 'communication_method', 'comms'])) return 'links';
-    if (hasAny(['vulnerability_type', 'severity', 'affected_node_ids', 'affected_nodes'])) return 'vulnerabilities';
-    if (hasAny(['node_type', 'parent_id', 'echelon', 'warfighting_function'])) return 'nodes';
-    return null;
+    var hasEnds = fields.indexOf('source') >= 0 && fields.indexOf('target') >= 0;
+    var linkScore = (hasEnds ? 3 : 0) + count(['relationship_type', 'communication_method', 'bandwidth', 'latency', 'dependency_strength', 'failure_impact', 'resilience', 'link_class', 'resource']);
+    var vulnScore = count(['vulnerability_type', 'severity', 'affected_node_ids', 'affected_link_ids', 'likelihood', 'detectability', 'operational_impact', 'mitigation']);
+    var nodeScore = count(['node_type', 'arch_class', 'parent_id', 'echelon', 'warfighting_function', 'lat', 'lon', 'side', 'mission_importance', 'echelon_importance', 'unit', 'service']);
+    var best = Math.max(linkScore, vulnScore, nodeScore);
+    if (best === 0) return null;
+    if (nodeScore === best) return 'nodes';
+    if (linkScore === best) return hasEnds ? 'links' : null;
+    return 'vulnerabilities';
   }
 
   /* Rows -> plain objects using the alias map. Unknown headers are kept as-is. */
@@ -411,7 +424,7 @@
   function importJson(text) {
     var data;
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(str(text).replace(/^\uFEFF/, ''));
     } catch (err) {
       throw new Error('Could not parse JSON: ' + err.message);
     }
@@ -430,6 +443,8 @@
     var out = deepClone(scenario || {});
     out.kind = 'osp-scenario';
     out.schema_version = str(out.schema_version, schemaVersion()) || schemaVersion();
+    // computed per-hour metrics are analysis output, never data (they also inflate files ~50%)
+    (out.nodes || []).forEach(function (n) { if (n && typeof n === 'object') delete n.metrics; });
     if (opts.includeLayout === false) delete out.layout;
     if (opts.exportedAt) {
       out.meta = out.meta || {};
@@ -465,8 +480,8 @@
     var geo = n.geo || {};
     var sym = n.symbol || {};
     return [
-      str(n.id), str(n.name), str(n.node_type), str(n.side), str(n.service),
-      str(n.echelon), str(n.unit), str(n.parent_id), str(n.warfighting_function),
+      str(n.id), str(n.name), str(n.node_type), str(n.arch_class), str(n.side), str(n.service),
+      str(n.echelon), str(n.unit), str(n.parent_id), str(n.parent_relationship), str(n.warfighting_function),
       str(n.domain), str(n.mission), str(n.mission_importance), str(n.echelon_importance),
       phaseIdsToText(n.phase_ids), str(n.status), statusByPhaseToText(n.status_by_phase),
       str(geo.location_name),
@@ -480,8 +495,9 @@
 
   function linkToRow(l) {
     return [
-      str(l.id), str(l.source), str(l.target), str(l.relationship_type), str(l.direction),
-      str(l.communication_method), str(l.bandwidth), str(l.latency), str(l.resilience),
+      str(l.id), str(l.source), str(l.target), str(l.relationship_type), str(l.link_class),
+      str(l.resource), str(l.resource_kind), str(l.direction),
+      str(l.communication_method), str(l.bandwidth), str(l.latency), str(l.protocol), str(l.resilience),
       str(l.encryption), str(l.dependency_strength), str(l.failure_impact),
       str(l.provenance), phaseIdsToText(l.phase_ids), str(l.status),
       statusByPhaseToText(l.status_by_phase), str(l.classification),
@@ -509,6 +525,39 @@
       'nodes.csv': toCsvText(NODE_CSV_FIELDS, nodes.map(nodeToRow)),
       'links.csv': toCsvText(LINK_CSV_FIELDS, links.map(linkToRow)),
       'vulnerabilities.csv': toCsvText(VULN_CSV_FIELDS, vulns.map(vulnToRow))
+    };
+  }
+
+  /* Blank templates: header row plus one worked example, so a staff section can start from a
+     spreadsheet without reading the schema. */
+  function csvTemplates() {
+    var node = {
+      id: 'div-hq', name: '25th ID Division Headquarters', node_type: 'headquarters', arch_class: 'performer',
+      side: 'Friendly', service: 'Army', echelon: 'Division', unit: '25th ID', parent_id: 'corps-main',
+      parent_relationship: 'opcon', warfighting_function: 'Command and Control', domain: 'c2',
+      mission: 'Command and control of assigned forces', mission_importance: 5, echelon_importance: 4,
+      phase_ids: 'all', status: 'Active', status_by_phase: 'p2:Degraded',
+      geo: { location_name: 'Fort Magsaysay', lat: 15.35, lon: 121.1 },
+      symbol: { branch_type: 'infantry', echelon_mark: 'XX', hq: true, cp: '' },
+      classification: 'UNCLASSIFIED', owner: 'G3', vulnerability_notes: '', tags: 'demo', notes: ''
+    };
+    var link = {
+      id: 'l-div-fires', source: 'div-hq', target: 'fires-cell', relationship_type: 'provides_data_to',
+      link_class: 'flow', resource: 'Fire mission requests', resource_kind: 'information', direction: 'directed',
+      communication_method: 'Tactical Data Link', bandwidth: '2 Mbps', latency: '<1 s', protocol: 'Link 16',
+      resilience: 3, encryption: 'Type 1', dependency_strength: 4, failure_impact: 4, provenance: 'doctrinal',
+      phase_ids: 'all', status: 'Active', status_by_phase: '', classification: 'UNCLASSIFIED', tags: '', notes: ''
+    };
+    var vuln = {
+      id: 'v-fiber-cut', title: 'Single fiber trunk to the theater network', vulnerability_type: 'single_point_of_failure',
+      affected_node_ids: 'fiber-node;theater-net', affected_link_ids: 'l-fiber-theater', severity: 4, likelihood: 3,
+      detectability: 2, operational_impact: 'Loss of the trunk forces all reach-back onto SATCOM.',
+      mitigation: 'Pre-position a second path and rehearse the switch.', status: 'open', notes: ''
+    };
+    return {
+      'nodes-template.csv': toCsvText(NODE_CSV_FIELDS, [nodeToRow(node)]),
+      'links-template.csv': toCsvText(LINK_CSV_FIELDS, [linkToRow(link)]),
+      'vulnerabilities-template.csv': toCsvText(VULN_CSV_FIELDS, [vulnToRow(vuln)])
     };
   }
 
@@ -544,6 +593,10 @@
     importJson: importJson,
     scenarioToJson: scenarioToJson,
     exportCsvTables: exportCsvTables,
+    csvTemplates: csvTemplates,
+    NODE_CSV_FIELDS: NODE_CSV_FIELDS,
+    LINK_CSV_FIELDS: LINK_CSV_FIELDS,
+    VULN_CSV_FIELDS: VULN_CSV_FIELDS,
     safeFilename: safeFilename,
     downloadBlob: downloadBlob
   };

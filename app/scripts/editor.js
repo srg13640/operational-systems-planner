@@ -35,6 +35,14 @@
     return true;
   }
 
+  /* Called whenever a different scenario is loaded: snapshots of the old one must not be
+     replayable into the new one. */
+  function resetUndo() {
+    undoStack = [];
+    editing = null;
+    placing = null;
+  }
+
   /* ---- mutation plumbing ---- */
 
   /* skipSnapshot: saving a just-created entity folds into its "add" snapshot,
@@ -61,6 +69,7 @@
     return [
       { k: 'name', label: 'Name', type: 'text' },
       { k: 'node_type', label: 'Type', type: 'select', opts: OSP.model.NODE_TYPES },
+      { k: 'arch_class', label: 'Architecture class', type: 'select', opts: OSP.model.ARCH_CLASSES },
       { k: 'side', label: 'Side', type: 'select', opts: OSP.model.SIDES },
       { k: 'echelon', label: 'Echelon', type: 'text' },
       { k: 'domain', label: 'Domain', type: 'select', opts: OSP.model.DOMAINS },
@@ -70,6 +79,7 @@
       { k: 'echelon_importance', label: 'Echelon importance', type: 'range15' },
       { k: 'status', label: 'Status', type: 'select', opts: OSP.model.STATUSES },
       { k: 'parent_id', label: 'Higher HQ', type: 'noderef', allowEmpty: true },
+      { k: 'parent_relationship', label: 'Relationship to HQ', type: 'select', opts: OSP.model.PARENT_RELATIONSHIPS },
       { k: 'phase_ids', label: 'Phases', type: 'phases', opts: phaseOpts },
       { k: 'geo.location_name', label: 'Location name', type: 'text' },
       { k: 'geo.lat', label: 'Latitude', type: 'number' },
@@ -87,7 +97,13 @@
       { k: 'source', label: 'Source', type: 'noderef' },
       { k: 'target', label: 'Target', type: 'noderef' },
       { k: 'relationship_type', label: 'Relationship', type: 'select', opts: OSP.model.RELATIONSHIP_TYPES },
+      { k: 'link_class', label: 'Link class', type: 'select', opts: OSP.model.LINK_CLASSES },
+      { k: 'resource', label: 'Resource carried', type: 'text', placeholder: 'e.g. Fire mission orders, Class V, Theater reach-back' },
+      { k: 'resource_kind', label: 'Resource kind', type: 'select', opts: OSP.model.RESOURCE_KINDS },
       { k: 'communication_method', label: 'Comms method', type: 'select', opts: OSP.model.COMM_METHODS },
+      { k: 'bandwidth', label: 'Bandwidth', type: 'text' },
+      { k: 'latency', label: 'Latency', type: 'text' },
+      { k: 'protocol', label: 'Protocol', type: 'text' },
       { k: 'direction', label: 'Direction', type: 'select', opts: ['directed', 'bidirectional'] },
       { k: 'resilience', label: 'Resilience', type: 'range15' },
       { k: 'dependency_strength', label: 'Dependency', type: 'range15' },
@@ -127,7 +143,7 @@
     var id = 'ef-' + f.k.replace(/\./g, '-');
     var inner = '';
     if (f.type === 'text') {
-      inner = '<input type="text" id="' + id + '" value="' + esc(val) + '">';
+      inner = '<input type="text" id="' + id + '" value="' + esc(val) + '"' + (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + '>';
     } else if (f.type === 'number') {
       inner = '<input type="number" step="0.01" id="' + id + '" value="' + esc(val === null ? '' : val) + '">';
     } else if (f.type === 'textarea') {
@@ -223,47 +239,82 @@
     return null;
   }
 
+  function readForm(fields) {
+    var values = {};
+    fields.forEach(function (f) {
+      var v = readField(f);
+      if (v !== undefined) values[f.k] = v;
+    });
+    return values;
+  }
+
+  /* Write form values onto the raw entity. The derived classes follow their driving field:
+     changing node_type re-derives arch_class (and relationship_type re-derives link_class)
+     unless the user changed the class in the same edit. */
+  function applyValues(entity, values, type) {
+    var before = JSON.parse(JSON.stringify(entity));
+    Object.keys(values).forEach(function (k) { setPath(entity, k, values[k]); });
+    if (type === 'node' && values.node_type !== undefined && values.node_type !== before.node_type
+      && values.arch_class === before.arch_class) {
+      entity.arch_class = OSP.model.ARCH_CLASS_OF_NODE_TYPE[values.node_type] || 'other';
+    }
+    if (type === 'link' && values.relationship_type !== undefined && values.relationship_type !== before.relationship_type
+      && values.link_class === before.link_class) {
+      entity.link_class = OSP.model.LINK_CLASS_OF_RELATIONSHIP[values.relationship_type] || 'flow';
+    }
+  }
+
   function saveEditor() {
     if (!editing) return;
     var e = editing;
     var fields = e.type === 'node' ? nodeFields(ctx.state.scenario) : linkFields(ctx.state.scenario);
+    var values = readForm(fields);
     applyEdit((e.isNew ? 'add ' : 'edit ') + e.type + ' ' + e.id, function (raw) {
       var entity = findEntity(raw, e.type, e.id);
       if (!entity) return;
-      fields.forEach(function (f) {
-        var v = readField(f);
-        if (v !== undefined) setPath(entity, f.k, v);
-      });
+      applyValues(entity, values, e.type);
     }, e.isNew);
     editing = null;
     ctx.select({ type: e.type, id: e.id });
+    var errs = ctx.state.issues.filter(function (x) { return x.level === 'error'; });
+    if (errs.length) app.toast(errs[0].where + ': ' + errs[0].message);
+  }
+
+  /* Close the form without selecting anything (the caller decides what to show next).
+     A brand-new entity is discarded via undo, because its snapshot predates creation. */
+  function discardEditor() {
+    if (!editing) return;
+    var wasNew = editing.isNew;
+    editing = null;
+    if (wasNew) undo();
   }
 
   function cancelEditor() {
-    if (editing && editing.isNew) {
-      // discard the just-created entity (its snapshot predates creation)
-      undo();
-      ctx.select(null);
-    } else {
-      var e = editing;
-      editing = null;
-      ctx.select(e ? { type: e.type, id: e.id } : null);
-    }
+    var e = editing;
+    var wasNew = !!(e && e.isNew);
+    discardEditor();
+    ctx.select(wasNew || !e ? null : { type: e.type, id: e.id });
   }
 
   /* ---- add / delete ---- */
 
+  /* New nodes default to the class the current view shows, so an OV-2 author gets a unit and an
+     SV-1 author gets a system; the form opens immediately and Cancel discards the node. */
   function addNode() {
     var sc = ctx.state.scenario;
     var id = nextId('node', sc.nodes);
+    var view = ctx.state.view;
+    var nodeType = (view === 'ov2' || view === 'ov4') ? 'unit' : 'system';
     applyEdit('add node ' + id, function (raw) {
       raw.nodes.push({
-        id: id, name: 'New node', node_type: 'system', side: 'Friendly',
+        id: id, name: 'New ' + nodeType, node_type: nodeType, side: 'Friendly',
         domain: 'other', mission: '', mission_importance: 3, echelon_importance: 3,
         phase_ids: 'all', status: 'Active', geo: {}, symbol: {}, tags: []
       });
     });
     openEditor('node', id, true);
+    var nameEl = document.getElementById('ef-name');
+    if (nameEl) { nameEl.focus(); nameEl.select(); }
   }
 
   function addLink(sourceId) {
@@ -300,6 +351,12 @@
           if (a.target_node_id === e.id) a.target_node_id = '';
         });
         if (raw.layout && raw.layout.graph_positions) delete raw.layout.graph_positions[e.id];
+        if (raw.layout && raw.layout.views) {
+          Object.keys(raw.layout.views).forEach(function (vid) {
+            var v = raw.layout.views[vid];
+            if (v && v.positions) delete v.positions[e.id];
+          });
+        }
       } else {
         raw.links = raw.links.filter(function (l) { return l.id !== e.id; });
         raw.vulnerabilities.forEach(function (v) {
@@ -313,9 +370,12 @@
 
   /* ---- place on map ---- */
 
+  /* Leaving for the map carries the form's unsaved values along, so "Set position" does not
+     throw away the name the user just typed. */
   function beginPlace() {
     if (!editing || editing.type !== 'node') return;
-    placing = editing.id;
+    placing = { id: editing.id, isNew: editing.isNew, values: readForm(nodeFields(ctx.state.scenario)) };
+    editing = null;
     ctx.setView('map');
     app.toast('Click the map to place the node. Esc cancels.');
   }
@@ -323,18 +383,18 @@
   /* Returns true when the click was consumed as a placement. */
   function handleMapClick(lat, lon) {
     if (!placing) return false;
-    var id = placing;
+    var p = placing;
     placing = null;
-    applyEdit('place node ' + id, function (raw) {
-      var n = null;
-      raw.nodes.forEach(function (x) { if (x.id === id) n = x; });
+    applyEdit('place node ' + p.id, function (raw) {
+      var n = findEntity(raw, 'node', p.id);
       if (!n) return;
+      applyValues(n, p.values, 'node');
       n.geo = n.geo || {};
       n.geo.lat = Math.round(lat * 10000) / 10000;
       n.geo.lon = Math.round(lon * 10000) / 10000;
       n.geo.non_geographic = false;
-    });
-    openEditor('node', id, false);
+    }, p.isNew);
+    openEditor('node', p.id, false);
     return true;
   }
 
@@ -365,10 +425,12 @@
     isPlacing: function () { return !!placing; },
     cancelPlacing: function () { placing = null; },
     openEditor: openEditor,
+    cancelEditor: discardEditor,
     addNode: addNode,
     addLink: addLink,
     handleMapClick: handleMapClick,
     undo: undo,
+    resetUndo: resetUndo,
     undoDepth: function () { return undoStack.length; }
   };
 })();

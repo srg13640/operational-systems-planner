@@ -22,10 +22,13 @@
      Leaves claim sequential horizontal slots in sorted-id DFS order and each
      parent centers over its children (the source's leaf-index approach,
      transposed from left-to-right tiers to top-to-bottom tiers). Nodes outside
-     any hierarchy (roots with no children) form a bottom tier. */
-  function layoutHierarchy(graph, width, height) {
+     any hierarchy (roots with no children) form a bottom tier.
+     opts.minSlotWidth / opts.tierHeight (px) let a labelled chart grow past the given box
+     instead of crushing leaves together; the caller fits the result to the screen. */
+  function layoutHierarchy(graph, width, height, opts) {
     var positions = {};
     if (!graph || !graph.nodes.length) return { positions: positions };
+    opts = opts || {};
 
     var innerW = Math.max(1, width - 2 * MARGIN);
     var innerH = Math.max(1, height - 2 * MARGIN);
@@ -77,21 +80,29 @@
       tierCount += 1;
     }
 
+    var slotCount = Math.max(1, leafIndex);
+    var slotW = Math.max(innerW / slotCount, opts.minSlotWidth || 0);
+    var looseW = Math.max(innerW / Math.max(1, looseIds.length), opts.minSlotWidth || 0);
+    var chartW = Math.max(slotW * slotCount, looseW * looseIds.length, innerW);
+    var tierGap = tierCount <= 1 ? 0 : Math.max(innerH / (tierCount - 1), opts.tierHeight || 0);
+
     function tierY(tier) {
       if (tierCount <= 1) return MARGIN + innerH / 2;
-      return MARGIN + tier * (innerH / (tierCount - 1));
+      return MARGIN + tier * tierGap;
     }
 
-    var slotCount = Math.max(1, leafIndex);
+    // centre both the tree row block and the loose row within the wider of the two
+    var treeX0 = MARGIN + (chartW - slotW * slotCount) / 2;
+    var looseX0 = MARGIN + (chartW - looseW * looseIds.length) / 2;
     Object.keys(slots).sort().forEach(function (id) {
       positions[id] = {
-        x: MARGIN + (slots[id] + 0.5) * (innerW / slotCount),
+        x: treeX0 + (slots[id] + 0.5) * slotW,
         y: tierY(depths[id])
       };
     });
     looseIds.forEach(function (id, i) {
       positions[id] = {
-        x: MARGIN + (i + 0.5) * (innerW / looseIds.length),
+        x: looseX0 + (i + 0.5) * looseW,
         y: tierY(bottomTier)
       };
     });
@@ -114,18 +125,35 @@
      ticks (spring along links, pairwise repulsion, mild centering) run to a
      kinetic-energy plateau, then a deterministic collision-separation pass so
      no two node discs overlap. pinnedPositions ({ nodeId: {x, y} }) keeps
-     those nodes fixed; they exert forces but never move. */
-  function layoutNetwork(graph, width, height, pinnedPositions) {
+     those nodes fixed; they exert forces but never move. opts.spacing (default 1) scales
+     rest lengths, repulsion, and the collision radius together, so a labelled diagram can
+     breathe without changing the shape the forces settle into. */
+  function layoutNetwork(graph, width, height, pinnedPositions, opts) {
     var positions = {};
     if (!graph || !graph.nodes.length) return { positions: positions, iterations: 0 };
     pinnedPositions = pinnedPositions || {};
+    var spacing = (opts && opts.spacing > 0) ? opts.spacing : 1;
+    var parkIsolates = !!(opts && opts.parkIsolates);
 
     var cx = width / 2;
     var cy = height / 2;
 
+    // Nodes with no relationship in this view have nothing to say about where they sit; the
+    // force model would fling them to the rim in id order. Park them in a lane below the
+    // connected diagram instead (opts.parkIsolates), so the eye reads "these are here but
+    // unconnected" rather than "these were placed there".
+    var degree = {};
+    graph.links.forEach(function (l) { degree[l.source] = (degree[l.source] || 0) + 1; degree[l.target] = (degree[l.target] || 0) + 1; });
+    var allIds = graph.nodes.map(function (n) { return n.id; }).sort();
+    var isolates = [];
+    var ids = allIds.filter(function (id) {
+      if (parkIsolates && !degree[id] && !pinnedPositions[id]) { isolates.push(id); return false; }
+      return true;
+    });
+    if (!ids.length) { ids = isolates; isolates = []; }
+
     // Working bodies in sorted-id order: iteration order (and therefore every
     // force accumulation) is a pure function of the dataset.
-    var ids = graph.nodes.map(function (n) { return n.id; }).sort();
     var bodies = [];
     var bodiesById = {};
     ids.forEach(function (id, i) {
@@ -157,15 +185,25 @@
     });
 
     var n = bodies.length;
-    var minDist = NODE_RADIUS * 2 + COLLIDE_PAD;
+    var minDist = (NODE_RADIUS * 2 + COLLIDE_PAD) * spacing;
+    var repulsion = 1800 * spacing * spacing;
+
+    /* Room the parked isolates will need under the diagram, so the connected part is shaped
+       for the space that remains. */
+    var laneRows = isolates.length ? Math.ceil(isolates.length / Math.max(1, Math.floor(width / (minDist * 1.9)))) : 0;
+    var laneH = laneRows ? minDist * 2.6 + (laneRows - 1) * minDist * 1.9 : 0;
+    var targetAspect = width / Math.max(1, height - laneH);
+    // centering pull is anisotropic: weaker along the long axis of the box, so the resting
+    // shape is an ellipse in the box's aspect rather than a disc
+    var gx = 0.0008 / Math.sqrt(targetAspect), gy = 0.0008 * Math.sqrt(targetAspect);
 
     function tick() {
       var i, j, a, b, dx, dy, d2, d, force, limit;
       for (i = 0; i < n; i++) {
         a = bodies[i];
         if (!a.pinned) {
-          a.vx += (cx - a.x) * 0.0008;
-          a.vy += (cy - a.y) * 0.0008;
+          a.vx += (cx - a.x) * gx;
+          a.vy += (cy - a.y) * gy;
         }
         limit = n > 380 ? Math.min(n, i + 80) : n;
         for (j = i + 1; j < limit; j++) {
@@ -173,7 +211,7 @@
           dx = a.x - b.x;
           dy = a.y - b.y;
           d2 = dx * dx + dy * dy + 0.01;
-          force = Math.min(1800 / d2, 2.4);
+          force = Math.min(repulsion / d2, 2.4);
           d = Math.sqrt(d2);
           dx /= d;
           dy /= d;
@@ -188,7 +226,7 @@
         var ldx = t.x - s.x;
         var ldy = t.y - s.y;
         var dist = Math.sqrt(ldx * ldx + ldy * ldy) || 1;
-        var desired = 100 + (5 - (link.dependency_strength || 3)) * 12;
+        var desired = (100 + (5 - (link.dependency_strength || 3)) * 12) * spacing;
         var f = (dist - desired) * 0.010;
         var fx = ldx / dist * f;
         var fy = ldy / dist * f;
@@ -269,9 +307,47 @@
       if (!separationSweep()) break;
     }
 
+    /* The forces settle into a round blob whatever the box. Stretch the free bodies about
+       the centre so the diagram's aspect approaches the box's (a wide canvas gets a wide
+       diagram and labels get horizontal room). Capped so nothing looks squeezed; pinned
+       bodies stay exactly where the author put them. */
+    var free = bodies.filter(function (b) { return !b.pinned; });
+    if (free.length > 2 && width > 0 && height > 0) {
+      var bx0 = Infinity, bx1 = -Infinity, by0 = Infinity, by1 = -Infinity;
+      free.forEach(function (b) { bx0 = Math.min(bx0, b.x); bx1 = Math.max(bx1, b.x); by0 = Math.min(by0, b.y); by1 = Math.max(by1, b.y); });
+      var bw = Math.max(1, bx1 - bx0), bh = Math.max(1, by1 - by0);
+      var want = targetAspect, have = bw / bh;
+      var mx = (bx0 + bx1) / 2, my = (by0 + by1) / 2;
+      if (have < want) {
+        var sx = Math.min(2.0, want / have);
+        free.forEach(function (b) { b.x = mx + (b.x - mx) * sx; });
+      } else if (have > want) {
+        var sy = Math.min(2.0, have / want);
+        free.forEach(function (b) { b.y = my + (b.y - my) * sy; });
+      }
+      for (var pass2 = 0; pass2 < MAX_SEPARATION_PASSES; pass2++) {
+        if (!separationSweep()) break;
+      }
+    }
+
     bodies.forEach(function (body) {
       positions[body.id] = { x: body.x, y: body.y };
     });
+
+    // Parked isolates: a row (wrapping) under the connected diagram, in sorted-id order.
+    if (isolates.length) {
+      var lx0 = Infinity, lx1 = -Infinity, ly1 = -Infinity;
+      bodies.forEach(function (b) { lx0 = Math.min(lx0, b.x); lx1 = Math.max(lx1, b.x); ly1 = Math.max(ly1, b.y); });
+      var gap = minDist * 1.9;
+      var span = Math.max(lx1 - lx0, gap * Math.min(isolates.length, 6));
+      var perRow = Math.max(1, Math.floor(span / gap) + 1);
+      var rowW = (Math.min(perRow, isolates.length) - 1) * gap;
+      var startX = (lx0 + lx1) / 2 - rowW / 2;
+      isolates.forEach(function (id, i) {
+        var row = Math.floor(i / perRow), col = i % perRow;
+        positions[id] = { x: startX + col * gap, y: ly1 + minDist * 2.6 + row * minDist * 1.9 };
+      });
+    }
     return { positions: positions, iterations: ticks };
   }
 

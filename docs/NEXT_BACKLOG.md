@@ -1,7 +1,29 @@
 # Next Backlog
 
-Updated: 2026-07-03. Ordered by product impact within each tier. Nothing here blocks the
+Updated: 2026-09-15. Ordered by product impact within each tier. Nothing here blocks the
 current demo; the shipped slice is complete and verified (see `VERIFICATION.md`).
+
+## Tier 0 — DoDAF architecture views (shipped 2026-09-15, follow-ons)
+
+Shipped: schema 1.1 (`arch_class`, `layout.views`), the `dodaf.js` view registry, OV-1 concept
+mode, OV-2 with derived needlines, OV-4, SV-1 / SV-2, per-view pins, optional criticality lens,
+model bar + titled exports, built-in scenarios migrated. Next, in order:
+
+1. **OV-3 / SV-6 exchange matrices.** Tabular export (CSV/Markdown) of OV-2 needlines and
+   SV-2 interfaces — producer, consumer, means, capacity, phase, derived-or-recorded. The
+   edges already exist in `buildView`; this is a formatter plus a Data-manager button.
+2. **AV-1 overview from `meta`.** One-page Markdown: purpose, scope (`assumptions`,
+   timeline), viewpoints present, entity counts by class, findings summary.
+3. **SV-5a capability-to-system mapping.** Needs a small `capabilities[]` table in the
+   scenario (or reuse `warfighting_function`) and a matrix view; decide the source of the
+   capability taxonomy first.
+4. **OV-5a/b activity models.** The `activities[]` table is time-scoped events, not an
+   activity decomposition — a real OV-5 needs a hierarchy of operational activities with
+   performer assignments. Larger schema step; scope with the audience before building.
+5. **Needline aggregation.** Collapse parallel OV-2 needlines between a performer pair into one
+   line with a count badge and an inspector list; today each link draws separately.
+6. **Location class.** `arch_class = location` entities appear only on OV-1 today; give them a
+   role (e.g. as OV-2 swim-lanes or SV-1 deployment groupings) or fold the class into `other`.
 
 ## Tier 1 — highest impact next
 

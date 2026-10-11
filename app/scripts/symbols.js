@@ -140,7 +140,7 @@
     var y = opts.y;
     var size = opts.size || FRAME_W;
     var scale = size / FRAME_W;
-    var color = opts.color || '#4d7fb8';
+    var color = opts.color || '#376d9f';
     var enemy = opts.side === 'Enemy';
 
     /* Rect frame inset ported from the source: 38 x 24 inside the 42 x 30

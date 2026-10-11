@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   window.OSP = window.OSP || {};
-  OSP.APP_VERSION = '1.0';
+  OSP.APP_VERSION = '1.1';
 
   var AUTOSAVE_KEY = 'osp-autosave-v1';
   var THEME_KEY = 'osp-theme';
@@ -14,7 +14,13 @@
     issues: [],
     scenarioRev: 0,
     t: 0,
-    view: 'map',
+    view: 'ov1',            // an OSP.dodaf view id; its surface (map|graph|stack|risk) drives the chrome
+    archView: null,         // OSP.dodaf.buildView result for the current graph/map-surface view
+    archLens: false,        // criticality lens on architecture views (always on for the dependency graph)
+    deriveNeedlines: true,  // OV-2: derive performer-to-performer needlines through systems
+    svContext: false,       // SV-1/SV-2: show owning performers as dashed context
+    svDependencies: false,  // SV-1/SV-2: also draw dependency-class links (depends_on/uses)
+    conceptMode: true,      // OV-1: suppress the analytic overlay
     graphMode: 'network',
     colorBy: 'criticality',
     selection: null,
@@ -24,9 +30,10 @@
     playSpeed: 2, // hours per second
     fullGraph: null,
     graph: null,
-    metricsInfo: { ranked: [], betweennessSkipped: false },
+    metricsInfo: { ranked: [], rankedAll: [], betweennessSkipped: false },
     findings: [],
-    layers: { links: true, zones: true, activities: true, annotations: true, labels: true, chains: true, graphLabels: true },
+    findingsDiff: { firstSeen: {}, resolved: [], escalated: [] },
+    layers: { links: true, zones: true, activities: true, annotations: true, labels: true, chains: true, graphLabels: true, linkLabels: false },
     riskFilters: { showAuto: true, showAnalyst: true, minSeverity: 1 }
   };
   OSP.state = state;
@@ -37,13 +44,20 @@
   var lastFrame = 0;
 
   function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  OSP.esc = esc;
+
+  function surface() { return OSP.dodaf.surfaceOf(state.view); }
+  function viewDef() { return OSP.dodaf.viewDef(state.view); }
 
   /* ---------- context passed to render modules ---------- */
 
   var ctx = {
     state: state,
     select: select,
-    setView: setView,
+    setView: function (v) { setView(v, { route: true }); },
     toggleIsolate: toggleIsolate,
     hoverTip: hoverTip,
     hideTip: hideTip,
@@ -106,10 +120,9 @@
     state.scenarioRev++;
     state.selection = null;
     state.isolate = false;
+    OSP.editor.resetUndo();   // undo must never resurrect the previous scenario
     state.t = OSP.model.clampNum(res.scenario.layout.t, 0, res.scenario.timeline.duration_hours, 0);
-    if (res.scenario.layout.view === 'map' || res.scenario.layout.view === 'graph' || res.scenario.layout.view === 'risk') {
-      state.view = res.scenario.layout.view;
-    }
+    if (OSP.dodaf.VIEW_BY_ID[res.scenario.layout.view]) state.view = res.scenario.layout.view;
     OSP.renderGraph.invalidateLayout();
     OSP.renderRisk.invalidateBaseline();
     buildTimelineUI();
@@ -118,26 +131,75 @@
     if (!opts || !opts.silent) renderAll();
   }
 
+  /* Findings at hour h, computed on a scratch graph. computeMetrics annotates node objects in
+     place, so callers must run the current hour last (recompute does). Boundary hours are
+     cached per scenario revision + weight settings; only the current hour is recomputed on
+     every scrub. */
+  var boundaryCache = { key: null, lists: {} };
+  function findingsAt(h) {
+    var sc = state.scenario;
+    var g = OSP.model.buildGraph(sc, h);
+    OSP.metrics.computeMetrics(g, sc.criticality_model);
+    return OSP.findings.mergeAnalystVulnerabilities(OSP.findings.detectFindings(g, sc), sc, g);
+  }
+  function findingsAtCached(h) {
+    var key = state.scenarioRev + ':' + JSON.stringify(state.scenario.criticality_model.weights);
+    if (boundaryCache.key !== key) boundaryCache = { key: key, lists: {} };
+    var k = String(h);
+    if (!boundaryCache.lists[k]) boundaryCache.lists[k] = findingsAt(h);
+    return boundaryCache.lists[k];
+  }
+
   function recompute() {
     var sc = state.scenario;
     state.fullGraph = OSP.model.buildGraph(sc, null);
+    // boundary hours first (they borrow node.metrics), then the current hour owns it
+    findingsAtCached(0);
+    sc.timeline.phases.forEach(function (p) { if (p.from_hours > 0 && p.from_hours <= state.t) findingsAtCached(p.from_hours + 0.001); });
     state.graph = OSP.model.buildGraph(sc, state.t);
     state.metricsInfo = OSP.metrics.computeMetrics(state.graph, sc.criticality_model);
     var auto = OSP.findings.detectFindings(state.graph, sc);
     state.findings = OSP.findings.mergeAnalystVulnerabilities(auto, sc, state.graph);
+    state.findingsDiff = OSP.findings.timelineDiff(sc, state.t, state.findings, findingsAtCached);
   }
+
+  /* The architecture view is a filter over the repository: rebuilt whenever the scenario, the
+     view, or a view option changes. Cheap at planning scale, so it simply runs every render. */
+  function buildArchView() {
+    var surf = surface();
+    if (surf !== 'graph' && surf !== 'map') { state.archView = null; return; }
+    state.archView = OSP.dodaf.buildView(state.view, state.scenario, state.fullGraph, {
+      deriveNeedlines: state.deriveNeedlines,
+      svContext: state.svContext,
+      svDependencies: state.svDependencies,
+      graph: state.graph
+    });
+  }
+
+  /* The banner is the high-water mark of everything in the scenario, not what meta says. */
+  function bannerText() {
+    var sc = state.scenario;
+    var cls = sc.meta.classification;
+    var marking = OSP.model.bannerMarking(sc, sc.nodes.concat(sc.links));
+    return marking + (cls.banner_caveat ? ' // ' + cls.banner_caveat : '') + (cls.prototype ? ' // PROTOTYPE' : '');
+  }
+  OSP.bannerText = bannerText;
 
   function renderAll() {
     var sc = state.scenario;
-    document.body.setAttribute('data-view', state.view);
+    var surf = surface();
+    var def = viewDef();
+    var isArch = OSP.dodaf.isArchitectureView(state.view);
+    document.body.setAttribute('data-view', surf);
+    document.body.setAttribute('data-model', state.view);
     document.body.classList.toggle('no-selection', !state.selection);
+    buildArchView();
 
     // top chrome
     $('scenarioName').textContent = sc.meta.name;
     $('scenarioName').title = sc.meta.description || sc.meta.name;
-    var cls = sc.meta.classification;
-    var bannerText = cls.marking + (cls.banner_caveat ? ' // ' + cls.banner_caveat : '') + (cls.prototype ? ' // PROTOTYPE' : '');
-    $('banner').textContent = bannerText;
+    $('banner').textContent = bannerText();
+    $('banner').title = 'Rolled up from the highest marking on any entity or link in the scenario';
 
     // view tabs
     var tabs = $('viewTabs').querySelectorAll('button');
@@ -146,30 +208,31 @@
     }
 
     // rail sections
-    $('railMap').style.display = state.view === 'map' ? '' : 'none';
+    $('railMap').style.display = surf === 'map' ? '' : 'none';
+    $('railArch').style.display = (surf === 'graph' && isArch) ? '' : 'none';
     $('railGraph').style.display = state.view === 'graph' ? '' : 'none';
-    $('railStack').style.display = state.view === 'stack' ? '' : 'none';
-    $('railRisk').style.display = state.view === 'risk' ? '' : 'none';
-    var railMeta = {
-      map: ['Operational map', 'Entities at real coordinates. Scrub time to change the fight.'],
-      graph: ['System graph', 'Structure is stable across time; dimmed entities are out of the current phase.'],
-      stack: ['Multi-domain stack', 'One system across every domain — vertical arcs are cross-domain dependencies.'],
-      risk: ['Risk board', 'What matters now, what breaks, and why.']
-    };
-    $('railTitle').textContent = railMeta[state.view][0];
-    $('railHint').textContent = railMeta[state.view][1];
+    $('railStack').style.display = surf === 'stack' ? '' : 'none';
+    $('railRisk').style.display = surf === 'risk' ? '' : 'none';
+    $('railTitle').textContent = def.code + ' · ' + def.title.replace(/ \(fit-for-purpose\)$/, '');
+    $('railHint').textContent = def.hint;
+    updateArchRail();
     rebuildStackLayers();
-    if (state.view === 'stack' && OSP.renderStack.isReady()) {
+    if (surf === 'stack' && OSP.renderStack.isReady()) {
       var km = OSP.renderStack.getBBoxKm();
       $('stackAoReadout').textContent = km.kmEW + ' × ' + km.kmNS + ' km operating area (from placed entities)';
     }
 
+    // model bar title
+    $('viewTitleCode').textContent = def.code;
+    $('viewTitleText').textContent = def.title.replace(/ \(fit-for-purpose\)$/, '');
+    $('viewTitleCaption').textContent = state.archView ? OSP.dodaf.caption(state.archView) : '';
+
     // per-view chrome
-    $('betweennessCaveat').style.display = state.metricsInfo.betweennessSkipped ? 'block' : 'none';
-    $('zoomCluster').style.display = state.view === 'risk' ? 'none' : 'flex';
+    $('betweennessCaveat').style.display = (state.metricsInfo.betweennessSkipped && lensActive()) ? 'block' : 'none';
+    $('zoomCluster').style.display = surf === 'risk' ? 'none' : 'flex';
     var pc = $('phaseCaption');
     var curPhase = state.graph.phase;
-    if (state.view !== 'risk' && curPhase && curPhase.notes) {
+    if (surf !== 'risk' && curPhase && curPhase.notes) {
       pc.innerHTML = '<b>' + curPhase.label.toUpperCase().replace(/</g, '&lt;') + '</b> — ' +
         String(curPhase.notes).replace(/&/g, '&amp;').replace(/</g, '&lt;');
       pc.style.display = 'block';
@@ -182,12 +245,62 @@
     updateStatusBar();
     updateTimelineUI();
 
-    // active view
-    if (state.view === 'map') OSP.renderMap.render();
-    else if (state.view === 'graph') OSP.renderGraph.render();
-    else if (state.view === 'stack') OSP.renderStack.render();
+    // active surface
+    if (surf === 'map') OSP.renderMap.render();
+    else if (surf === 'graph') OSP.renderGraph.render();
+    else if (surf === 'stack') OSP.renderStack.render();
     else OSP.renderRisk.render();
     OSP.inspector.render();
+  }
+
+  /* Criticality coloring is shown on the dependency graph, on the map when concept mode is
+     off, and on architecture views only when the lens is switched on. */
+  function lensActive() {
+    if (state.view === 'graph' || surface() === 'stack' || surface() === 'risk') return true;
+    if (state.view === 'ov1') return !state.conceptMode;
+    return state.archLens;
+  }
+
+  function updateArchRail() {
+    var v = state.archView;
+    if (!v || surface() !== 'graph' || !OSP.dodaf.isArchitectureView(state.view)) return;
+    $('archCaption').textContent = OSP.dodaf.caption(v);
+    $('archHidden').textContent = OSP.dodaf.hiddenSummary(v);
+    $('rowDerive').style.display = state.view === 'ov2' ? '' : 'none';
+    $('rowSvContext').style.display = (state.view === 'sv1' || state.view === 'sv2') ? '' : 'none';
+    $('rowLinkLabels').style.display = state.view === 'sv2' ? 'none' : '';
+    $('legendOrg').style.display = state.view === 'ov4' ? '' : 'none';
+    $('chkDerive').checked = state.deriveNeedlines;
+    $('chkSvContext').checked = state.svContext;
+    $('chkArchLabels').checked = state.layers.graphLabels;
+    $('chkLinkLabels').checked = state.layers.linkLabels;
+    $('chkArchLens').checked = state.archLens;
+  }
+
+  /* View tabs are generated from the view registry, grouped by viewpoint. */
+  function buildViewTabs() {
+    var nav = $('viewTabs');
+    nav.innerHTML = '';
+    var hotkey = 0;
+    OSP.dodaf.GROUPS.forEach(function (g) {
+      var span = document.createElement('span');
+      span.className = 'tabGroup ' + g.id;
+      var label = document.createElement('i');
+      label.className = 'tabGroupLabel';
+      label.textContent = g.label;
+      span.appendChild(label);
+      g.views.forEach(function (vid) {
+        var def = OSP.dodaf.viewDef(vid);
+        hotkey++;
+        var b = document.createElement('button');
+        b.setAttribute('data-view', vid);
+        b.textContent = def.short;
+        b.title = def.code + ' ' + def.title + ' (' + hotkey + ')';
+        b.addEventListener('click', function () { setView(vid); });
+        span.appendChild(b);
+      });
+      nav.appendChild(span);
+    });
   }
 
   function updateCountsPill() {
@@ -195,7 +308,10 @@
     var full = state.fullGraph;
     var warnCount = state.issues.filter(function (x) { return x.level === 'warning'; }).length;
     var errCount = state.issues.filter(function (x) { return x.level === 'error'; }).length;
-    var txt = g.nodes.length + '/' + full.nodes.length + ' nodes · ' + g.links.length + '/' + full.links.length + ' links';
+    // architecture views count what the view shows this hour; analysis surfaces count the repository
+    var txt = (state.archView && state.archView.id !== 'graph')
+      ? OSP.dodaf.caption(state.archView)
+      : g.nodes.length + '/' + full.nodes.length + ' nodes · ' + g.links.length + '/' + full.links.length + ' links';
     if (errCount || warnCount) txt += ' · ' + (errCount ? errCount + ' err ' : '') + (warnCount ? warnCount + ' warn' : '');
     $('countsPill').innerHTML = '<span id="pillCounts"></span><span id="mapCursor"></span>';
     $('pillCounts').textContent = txt;
@@ -233,7 +349,11 @@
         '<div class="legendRow"><span class="swatch" style="background:var(--crit)"></span> Offline</div>';
     } else {
       var doms = ['c2', 'strike', 'sustain', 'space', 'air', 'ems', 'cyber', 'land', 'maritime', 'data'];
-      var colors = { c2: '#5b8dd6', strike: '#e4574f', sustain: '#61a56c', space: '#b03a9e', air: '#45d6b4', ems: '#e0a33c', cyber: '#9a6dd6', land: '#8a9aa8', maritime: '#2e9bd6', data: '#c9a13b' };
+      var colors = {
+        c2: '#567c9f', strike: '#a85d51', sustain: '#667f6d', space: '#786985',
+        air: '#658993', ems: '#9a7a4f', cyber: '#756b8f', land: '#74808a',
+        maritime: '#4f7895', data: '#8d7b50'
+      };
       el.innerHTML = doms.map(function (d) {
         return '<div class="legendRow"><span class="swatch" style="background:' + colors[d] + '"></span> ' + d + '</div>';
       }).join('');
@@ -259,7 +379,7 @@
     $('stScenario').textContent = state.scenario.meta.name;
     $('stPhase').textContent = state.graph.phase ? state.graph.phase.label.toUpperCase() : 'NO PHASE';
     $('stTime').textContent = 'H+' + Math.round(state.t);
-    $('stView').textContent = state.view.toUpperCase() + (state.view === 'graph' ? '/' + state.graphMode.toUpperCase() : '');
+    $('stView').textContent = viewDef().code + (state.view === 'graph' ? '/' + state.graphMode.toUpperCase() : '');
     $('stCounts').textContent = state.findings.length + ' findings';
     $('stSelection').textContent = selectionLabel();
   }
@@ -297,8 +417,9 @@
   }
 
   function updateTimelineUI() {
-    var h = Math.floor(state.t);
-    var m = Math.round((state.t - h) * 60);
+    var totalMin = Math.round(state.t * 60);
+    var h = Math.floor(totalMin / 60);
+    var m = totalMin - h * 60;
     var mm = m < 10 ? '0' + m : String(m);
     var hh = h < 10 ? '0' + h : String(h);
     $('timecode').innerHTML = 'H+' + hh + ':' + mm + '<span class="phase">' +
@@ -350,23 +471,53 @@
   /* ---------- selection / view ---------- */
 
   function select(sel) {
+    var prev = state.selection;
+    var changed = !prev || !sel || prev.type !== sel.type || prev.id !== sel.id;
+    // an open editor form belongs to the previous selection; never let it write to the new one
+    if (changed && OSP.editor.isEditing && OSP.editor.isEditing()) OSP.editor.cancelEditor();
     state.selection = sel;
     if (!sel) state.isolate = false;
     renderAll();
   }
 
-  function setView(v) {
-    if (state.view === 'stack' && v !== 'stack') exitSpotlight();
+  /* Accepts a view id or a surface name. With opts.route (the inspector's "show in graph"),
+     'graph' lands on the natural view for the selected node — a performer's on OV-2, a
+     system's on SV-1 — unless the analysis graph is already up. Tabs and hotkeys never route. */
+  function setView(v, opts) {
+    if (v === 'map') v = 'ov1';
+    if (v === 'graph' && opts && opts.route && state.view !== 'graph') {
+      var selNode = state.selection && state.selection.type === 'node' && state.fullGraph.nodesById[state.selection.id];
+      v = selNode ? OSP.dodaf.graphViewForNode(selNode) : 'graph';
+    }
+    if (!OSP.dodaf.VIEW_BY_ID[v]) return;
+    if (surface() === 'stack' && OSP.dodaf.surfaceOf(v) !== 'stack') exitSpotlight();
+    var viewChanged = v !== state.view;
+    var newSurface = OSP.dodaf.surfaceOf(v);
     state.view = v;
     state.scenario.layout.view = v;
+    if (viewChanged) OSP.renderGraph.invalidateLayout();
     renderAll();
+    // an isolate around a node this view does not show would leave a blank canvas
+    if (state.isolate && state.archView && state.selection && state.selection.type === 'node' && !state.archView.nodesById[state.selection.id]) {
+      state.isolate = false;
+      renderAll();
+      toast('Isolate cleared — ' + selectionLabel() + ' is not on ' + viewDef().code + '.');
+    }
+    // each graph view has its own layout, so it needs its own fit; the map keeps the viewport
+    if (viewChanged && newSurface === 'graph') {
+      requestAnimationFrame(function () { if (surface() === 'graph') OSP.renderGraph.fit(); });
+    }
     markDirty();
   }
 
   function toggleIsolate() {
     if (!state.selection || state.selection.type !== 'node') return;
     state.isolate = !state.isolate;
-    if (state.view !== 'graph') state.view = 'graph';
+    if (surface() !== 'graph') {
+      var n = state.fullGraph.nodesById[state.selection.id];
+      state.view = n ? OSP.dodaf.graphViewForNode(n) : 'graph';
+      OSP.renderGraph.invalidateLayout();
+    }
     renderAll();
   }
 
@@ -380,7 +531,7 @@
 
   function autosave() {
     try {
-      var json = JSON.stringify(state.scenario);
+      var json = OSP.io.scenarioToJson(state.scenario);   // strips computed metrics
       if (json.length > 4000000) {
         toast('Scenario too large for autosave — use Export JSON.');
         return;
@@ -403,8 +554,8 @@
     loadScenario(readSeed(which));
     closeModal('dataModal');
     requestAnimationFrame(function () {
-      if (state.view === 'graph') OSP.renderGraph.fit();
-      else if (state.view === 'map') OSP.renderMap.fit();
+      if (surface() === 'graph') OSP.renderGraph.fit();
+      else if (surface() === 'map') OSP.renderMap.fit();
     });
     toast(label + ' loaded.');
   }
@@ -426,32 +577,34 @@
     pendingImport = null;
     var raw = null;
     var summary = [];
+    var norm;
     try {
-      var trimmed = String(text || '').replace(/^\s+/, '');
+      var trimmed = String(text || '').replace(/^\uFEFF/, '').replace(/^\s+/, '');
       if (trimmed.charAt(0) === '{' || trimmed.charAt(0) === '[') {
-        var res = OSP.io.importJson(text);
+        var res = OSP.io.importJson(trimmed);
         raw = res.raw;
         summary.push('Format: ' + (res.format === 'svt-legacy' ? 'legacy Systems Viz dataset (adapted)' : 'OSP scenario'));
       } else {
-        var csv = OSP.io.importCsv(text, state.scenario);
+        var csv = OSP.io.importCsv(trimmed, state.scenario);
         raw = csv.raw;
         summary.push('Format: CSV → ' + csv.kind + ' table, ' + csv.count + ' rows merged by id');
       }
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('Not a scenario object');
+      norm = OSP.model.normalizeScenario(raw);
     } catch (e) {
       report.style.display = 'block';
-      report.innerHTML = '<div class="err">Import failed: ' + String(e.message || e).replace(/</g, '&lt;') + '</div>';
+      report.innerHTML = '<div class="err">Import failed: ' + esc(String(e.message || e)) + '</div>';
       confirmRow.style.display = 'none';
       return;
     }
-    var norm = OSP.model.normalizeScenario(raw);
     var errs = norm.issues.filter(function (x) { return x.level === 'error'; });
     var warns = norm.issues.filter(function (x) { return x.level === 'warning'; });
     summary.push(norm.scenario.nodes.length + ' nodes, ' + norm.scenario.links.length + ' links, ' +
       norm.scenario.vulnerabilities.length + ' vulnerabilities, ' + norm.scenario.activities.length + ' activities, ' +
       norm.scenario.timeline.phases.length + ' phases');
-    var html = '<div class="okline">' + summary.join(' · ') + '</div>';
-    if (errs.length) html += errs.map(function (x) { return '<div class="err">ERROR ' + x.where + ': ' + x.message + '</div>'; }).join('');
-    if (warns.length) html += warns.map(function (x) { return '<div class="warn">warn ' + x.where + ': ' + x.message + '</div>'; }).join('');
+    var html = '<div class="okline">' + esc(summary.join(' · ')) + '</div>';
+    if (errs.length) html += errs.map(function (x) { return '<div class="err">ERROR ' + esc(x.where) + ': ' + esc(x.message) + '</div>'; }).join('');
+    if (warns.length) html += warns.map(function (x) { return '<div class="warn">warn ' + esc(x.where) + ': ' + esc(x.message) + '</div>'; }).join('');
     if (!errs.length && !warns.length) html += '<div class="okline">Validation clean — no issues.</div>';
     report.style.display = 'block';
     report.innerHTML = html;
@@ -462,21 +615,23 @@
   /* ---------- wiring ---------- */
 
   function wireChrome() {
-    // view tabs
-    var tabs = $('viewTabs').querySelectorAll('button');
-    for (var i = 0; i < tabs.length; i++) {
-      (function (b) {
-        b.addEventListener('click', function () { setView(b.getAttribute('data-view')); });
-      })(tabs[i]);
-    }
+    buildViewTabs();
 
     // top actions
     $('btnAddNode').addEventListener('click', function () { OSP.editor.addNode(); });
     $('btnData').addEventListener('click', function () { openModal('dataModal'); });
-    $('btnExport').addEventListener('click', function () {
-      var name = OSP.exporter.exportCurrentView();
-      toast('Exported ' + name);
+    $('btnExport').addEventListener('click', function (e) {
+      // Shift-click: 16:9 slide frame (1920x1080) instead of the live canvas size
+      var result;
+      try { result = OSP.exporter.exportCurrentView({ preset: e.shiftKey ? 'slide' : null }); }
+      catch (err) { result = Promise.reject(err); }
+      Promise.resolve(result).then(function (name) {
+        toast('Exported ' + name);
+      }, function (err) {
+        toast('Export failed: ' + (err && err.message ? err.message : err));
+      });
     });
+    $('btnExport').title = 'Export current view (PNG on Map/Graph/Stack, findings summary on Risk). Shift-click for a 16:9 slide frame.';
     $('btnBrief').addEventListener('click', toggleBrief);
     $('btnTheme').addEventListener('click', toggleTheme);
     $('btnHelp').addEventListener('click', function () { openModal('helpOverlay'); });
@@ -522,6 +677,23 @@
     bindCheck('lyrActivities', 'activities'); bindCheck('lyrAnnotations', 'annotations');
     bindCheck('lyrLabels', 'labels'); bindCheck('chkChains', 'chains');
     bindCheck('chkGraphLabels', 'graphLabels');
+    bindCheck('chkArchLabels', 'graphLabels');
+    bindCheck('chkLinkLabels', 'linkLabels');
+
+    // OV-1 concept mode; architecture-view options
+    $('chkConcept').addEventListener('change', function () { state.conceptMode = this.checked; renderAll(); });
+    $('chkArchLens').addEventListener('change', function () { state.archLens = this.checked; renderAll(); });
+    $('chkDerive').addEventListener('change', function () {
+      state.deriveNeedlines = this.checked;
+      OSP.renderGraph.invalidateLayout();
+      renderAll();
+    });
+    $('chkSvContext').addEventListener('change', function () {
+      state.svContext = this.checked;
+      OSP.renderGraph.invalidateLayout();
+      renderAll();
+      OSP.renderGraph.fit();
+    });
 
     // stack controls
     $('stackSep').addEventListener('input', function () {
@@ -648,8 +820,9 @@
   }
 
   function activeRenderer() {
-    if (state.view === 'graph') return OSP.renderGraph;
-    if (state.view === 'stack') return OSP.renderStack;
+    var surf = surface();
+    if (surf === 'graph') return OSP.renderGraph;
+    if (surf === 'stack') return OSP.renderStack;
     return OSP.renderMap;
   }
 
@@ -693,15 +866,15 @@
     document.body.classList.toggle('brief', state.briefMode);
     $('btnBrief').classList.toggle('active', state.briefMode);
     renderAll();
-    if (state.view !== 'risk') activeRenderer().fit();
+    if (surface() !== 'risk') activeRenderer().fit();
   }
 
   function toggleTheme() {
     var cur = document.documentElement.getAttribute('data-theme');
-    var next = cur === 'light' ? null : 'light';
+    var next = cur === 'dark' ? null : 'dark';
     if (next) document.documentElement.setAttribute('data-theme', next);
     else document.documentElement.removeAttribute('data-theme');
-    try { localStorage.setItem(THEME_KEY, next || 'dark'); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(THEME_KEY, next || 'light'); } catch (e) { /* ignore */ }
     renderAll();
   }
 
@@ -758,28 +931,28 @@
       return;
     }
     var k = e.key;
-    if ((e.metaKey || e.ctrlKey) && (k === 'z' || k === 'Z')) {
+    if ((e.metaKey || e.ctrlKey) && (k === 'z' || k === 'Z') && !e.shiftKey) {
       e.preventDefault();
       if (!OSP.editor.undo()) toast('Nothing to undo.');
       return;
     }
-    if (k === '1') setView('map');
-    else if (k === '2') setView('graph');
-    else if (k === '3') setView('stack');
-    else if (k === '4') setView('risk');
+    // browser/OS chords (Cmd+2, Cmd+F, Cmd+0 …) are not ours
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var hot = hotkeyViews();
+    if (k >= '1' && k <= String(hot.length) && hot[parseInt(k, 10) - 1]) setView(hot[parseInt(k, 10) - 1]);
     else if (k === ' ') { e.preventDefault(); togglePlay(); }
     else if (k === 'ArrowLeft') setT(state.t - 1);
     else if (k === 'ArrowRight') setT(state.t + 1);
     else if (k === '[') setT(state.t - 6);
     else if (k === ']') setT(state.t + 6);
     else if (k === '0') setT(0);
-    else if (k === 'f' || k === 'F') { if (state.view !== 'risk') activeRenderer().fit(); }
+    else if (k === 'f' || k === 'F') { if (surface() !== 'risk') activeRenderer().fit(); }
     else if (k === 'i' || k === 'I') toggleIsolate();
     else if (k === 'b' || k === 'B') toggleBrief();
     else if (k === '/') { e.preventDefault(); $('searchBox').focus(); $('searchBox').select(); }
     else if (k === '?') openModal('helpOverlay');
     else if (k === '\\') document.body.classList.toggle('rail-collapsed');
-    else if ((k === 's' || k === 'S') && state.view === 'stack') toggleSpotlight();
+    else if ((k === 's' || k === 'S') && surface() === 'stack') toggleSpotlight();
     else if (k === 'Escape') {
       if (exitSpotlight()) { /* handled */ }
       else if (OSP.editor.isPlacing()) { OSP.editor.cancelPlacing(); toast('Placement cancelled.'); }
@@ -788,6 +961,13 @@
       else if (state.isolate) { state.isolate = false; renderAll(); }
       else if (state.selection) select(null);
     }
+  }
+
+  /* Hotkeys 1..n follow the tab order (registry groups, in order). */
+  function hotkeyViews() {
+    var out = [];
+    OSP.dodaf.GROUPS.forEach(function (g) { g.views.forEach(function (v) { out.push(v); }); });
+    return out;
   }
 
   /* ---------- weights ---------- */
@@ -819,16 +999,25 @@
 
   /* ---------- boot ---------- */
 
+  /* A usable autosave is a plain object with a nodes array. Anything else — a stray string,
+     an array, a half-written record — falls back to the seed rather than booting an empty or
+     broken session. */
+  function looksLikeScenario(raw) {
+    return !!raw && typeof raw === 'object' && !Array.isArray(raw) && Array.isArray(raw.nodes);
+  }
+
   function boot() {
     var raw = null;
     var restored = false;
+    var autosaveBad = false;
     try {
       var saved = localStorage.getItem(AUTOSAVE_KEY);
       if (saved) {
         raw = JSON.parse(saved);
-        restored = true;
+        if (looksLikeScenario(raw)) restored = true;
+        else { raw = null; autosaveBad = true; }
       }
-    } catch (e) { raw = null; restored = false; }
+    } catch (e) { raw = null; restored = false; autosaveBad = true; }
     if (!raw) raw = readSeed();
 
     OSP.renderGraph.init(ctx);
@@ -840,11 +1029,23 @@
     OSP.editor.init(ctx, { replaceScenario: replaceScenario, toast: toast });
 
     wireChrome();
-    loadScenario(raw, { silent: true });
+    try {
+      loadScenario(raw, { silent: true });
+    } catch (e) {
+      // a poisoned autosave must never brick the app: drop it and boot the seed
+      autosaveBad = true;
+      restored = false;
+      try { localStorage.removeItem(AUTOSAVE_KEY); } catch (e2) { /* ignore */ }
+      loadScenario(readSeed(), { silent: true });
+    }
     renderAll();
+    if (autosaveBad) {
+      try { localStorage.removeItem(AUTOSAVE_KEY); } catch (e3) { /* ignore */ }
+      setTimeout(function () { toast('Saved session could not be read and was discarded; loaded the built-in scenario.'); }, 50);
+    }
     // initial fit must wait one frame: at boot the canvas has no layout yet
     requestAnimationFrame(function () {
-      if (state.view === 'graph') OSP.renderGraph.fit();
+      if (surface() === 'graph') OSP.renderGraph.fit();
       else OSP.renderMap.fit();
     });
     $('saveDot').className = restored ? 'saved' : '';

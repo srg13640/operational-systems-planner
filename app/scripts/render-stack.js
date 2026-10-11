@@ -47,17 +47,17 @@
   var SURFACE_DOMAINS = { land: 1, maritime: 1 };
   var DOMAIN_ORDER = ['space', 'air', 'ems', 'cyber', 'c2', 'data', 'strike', 'sustain', 'other', 'maritime', 'land'];
   var DOMAIN_COLORS = {
-    land: '#5ee3c1', air: '#7ec9ff', maritime: '#4fa3e0', space: '#b189ff',
-    cyber: '#c97bff', ems: '#ffb347', sustain: '#e3c78a', c2: '#ffffff',
-    strike: '#ff8c6a', data: '#f2c94c', other: '#8aa0b3'
+    land: '#74808a', air: '#7292a1', maritime: '#547f9c', space: '#81758e',
+    cyber: '#796f91', ems: '#a1845d', sustain: '#7b8a6c', c2: '#d7dde2',
+    strike: '#ad6758', data: '#9a895c', other: '#7b8791'
   };
   var CONTACT_COLORS = {
-    direct: '#ff5d6c', indirect: '#ff8c42', air: '#7ec9ff', maritime: '#4fa3e0',
-    electronic: '#c97bff', cyber: '#c97bff', information: '#f2c94c', sensing: '#5ee3c1'
+    direct: '#c25c53', indirect: '#b47a3b', air: '#7292a1', maritime: '#547f9c',
+    electronic: '#796f91', cyber: '#796f91', information: '#9a895c', sensing: '#6f8c77'
   };
-  var ENEMY_COLOR = '#ff5d6c';
-  var FRIENDLY_COLOR = '#7ec9ff';
-  var HILITE = '#5ee3c1';
+  var ENEMY_COLOR = '#c25c53';
+  var FRIENDLY_COLOR = '#6f99bd';
+  var HILITE = '#7ea6c9';
 
   var PLANE_W = 1500, PLANE_D = 980;   // world units spanning the scenario bbox
 
@@ -228,7 +228,7 @@
     return new THREE.Points(geo, mat);
   }
 
-  function themeIsLight() { return document.documentElement.getAttribute('data-theme') === 'light'; }
+  function themeIsLight() { return document.documentElement.getAttribute('data-theme') !== 'dark'; }
 
   /* ================= orbit camera ================= */
 
@@ -778,7 +778,9 @@
         animated.pulseRings.push({ mat: selMat, base: 0.85, speed: 3.1, phase: hashPhase(n.id + '-sel') });
       }
       if (st.layers.graphLabels !== false && opts.labels) {
-        var lbl = labelSprite(n.name, active ? '#e8f3ff' : '#6b8091');
+        var labelFg = themeIsLight() ? '#26323c' : '#e8edf1';
+        var labelDim = themeIsLight() ? '#76828c' : '#89949f';
+        var lbl = labelSprite(n.name, active ? labelFg : labelDim);
         lbl.scale.set(220, 30, 1);
         lbl.position.set(p.x, p.y - baseScale / 2 - 16, p.z);
         group.nodes.add(lbl);
